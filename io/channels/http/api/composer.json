@@ -1,0 +1,35 @@
+{
+    "name": "firestark/project",
+    "type": "project",
+    "description": "PHP7+ NON-MVC framework focused on the business logic.",
+    "keywords": [
+        "framework",
+        "non-mvc",
+        "business logic",
+        "firestark"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aron Wouters",
+            "email": "firestark@mail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "": []
+        },
+        "files": []
+    },
+    "autoload-dev": {
+        "psr-4": {},
+        "files": []
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "dev"
+}

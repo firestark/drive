@@ -1,0 +1,55 @@
+{
+    "name": "firestark/project",
+    "type": "project",
+    "description": "PHP7+ NON-MVC framework focused on the business logic.",
+    "keywords": [
+        "framework",
+        "non-mvc",
+        "business logic",
+        "firestark"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aron Wouters",
+            "email": "firestark@mail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1.3"
+    },
+    "require-dev": {
+        "wikimedia/composer-merge-plugin": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "": [
+                "app/agreements",
+                "io/services",
+                "tools"
+            ]
+        },
+        "files": [
+            "./tools/readability.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {},
+        "files": []
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "merge-plugin": {
+            "require": [
+                "app/tests/composer.json",
+                "io/channels/cli/composer.json",
+                "io/channels/http/api/composer.json",
+                "io/channels/http/web/composer.json"
+            ]
+        }
+    }
+}

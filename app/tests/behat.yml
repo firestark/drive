@@ -1,0 +1,7 @@
+default:
+    paths:
+        features: ../features
+        bootstrap: ./features
+    suites:
+        core:
+            contexts: [ FeatureContext ]
