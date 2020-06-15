@@ -22,8 +22,3 @@ Feature: Quest queue
         When "Aron" looks at the quest queue of "Glenn"
         Then "Aron" should see "Glenn" has a quest in his queue with a title of "PBR basics"
         And the total amount of quests in "Glenn" his queue should be 1
-
-
-## Possbile scenario's
-
-- How to find new quests to put on the queue

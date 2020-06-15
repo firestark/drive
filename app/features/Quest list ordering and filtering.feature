@@ -37,5 +37,5 @@ Feature: Quest list ordering and filtering
 
     Scenario: Filtering by time estimate
         Given the art director has not filtered the quest list
-        When the art director filters for quest with a time estimate of 5 - 10 minutes
+        When the art director filters for quests with a time estimate of 5 - 10 minutes
         Then the results contain quests with a time estimate of 5 - 10 minutes

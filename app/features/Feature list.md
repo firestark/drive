@@ -2,9 +2,9 @@
 
 ## What about a game studio portal
 
-Glenn and i want to start working on creating a game (studio). A game studio
+Glenn and I want to start working on creating a game (studio). A game studio
 has some particular tasks that need to be looked after. A portal to group all
-these tasks and resources would be helpfull.
+these tasks and resources would be helpful.
 
 ## Brainstorm
 
