@@ -1,7 +1,8 @@
 default:
-    paths:
-        features: ../features
-        bootstrap: ./features
+    autoload:
+        '': ./features
     suites:
-        core:
+        default:
             contexts: [ FeatureContext ]
+            paths:
+                - ../features
