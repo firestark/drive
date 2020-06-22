@@ -7,53 +7,70 @@ Feature: Quest list
     Background:
         Given an art director called "Aron" exists
         And an art director called "Glenn" exists
-        And given the following quests exist:
-            | Title          | Description                                     | Category    | Time estimate (minutes) | Creation date |
-            | PBR basics     | This tutorial will explain what PBR shading is. | Texturing   | 5 - 10                  | 6 June 2020   |
-            | Blender basics | Learn the basics of blender.                    | 3D modeling | 5 - 10                  | 5 June 2020   |
+        And given the following quests exist: 
+            | Title                 | Description                                           | Category         | Time estimate | More info                                                                                                                           |
+            | PBR introduction      | A short introduction to PBR                           | Texturing        | 3 - 5 min     | PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s |
+            | Game genres explained | Every game genre has it charms, learn about them here | Idea exploration | 3 - 5 min     | Every game genre has it charms, learn about them here: https://www.youtube.com/watch?v=DSJvCffJCzE&t=15s                            |
+
+        And "Aron" his done list is exactly as follows:
+            | Quest            |
+            | PBR introduction |
 
 
     Scenario: Adding a new quest
         When an art director adds the following quest:
-            | Title         | Description                               | Category    | Time estimate (minutes) | Creation date |
-            | Unreal basics | This tutorial will explain unreal engine. | Game engine | 15 - 20                 | 7 June 2020   |
+            | Title                | Description                       | Category    | Time estimate | More info                                                                                         |
+            | Unreal engine basics | Learn the basics of unreal engine | Game engine | 10 min        | Learn the basics of unreal engine with this tutorial: https://www.youtube.com/watch?v=_LaVvGlkBDs |
 
         Then the quest list is exactly as follows:
-            | Title          | Description                                     | Category    | Time estimate (minutes) | Creation date |
-            | Unreal basics  | This tutorial will explain unreal engine.       | Game engine | 15 - 20                 | 7 June 2020   |
-            | PBR basics     | This tutorial will explain what PBR shading is. | Texturing   | 5 - 10                  | 6 June 2020   |
-            | Blender basics | Learn the basics of blender.                    | 3D modeling | 5 - 10                  | 5 June 2020   |
+            | Title                 | Description                                           | Category         | Time estimate | More info                                                                                                                           |
+            | PBR introduction      | A short introduction to PBR                           | Texturing        | 3 - 5 min     | PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s |
+            | Game genres explained | Every game genre has it charms, learn about them here | Idea exploration | 3 - 5 min     | Every game genre has it charms, learn about them here: https://www.youtube.com/watch?v=DSJvCffJCzE&t=15s                            |
+            | Unreal engine basics  | Learn the basics of unreal engine                     | Game engine      | 10 min        | Learn the basics of unreal engine with this tutorial: https://www.youtube.com/watch?v=_LaVvGlkBDs                                   |
 
 
     Scenario: Deny adding quests with existing titles
-        When an art director adds a quest with a title of "PBR basics" to the list
-        Then the art director should see a quest with a title of "PBR basics" already exists in the list
+        When an art director adds the following quest:
+            | Title                 | Description      | Category  | Time estimate | More info      |
+            | PBR introduction      | Some description | Texturing | 10 min        | Some more info |
+        
+        Then the art director should see a quest with a title of "PBR introduction" already exists in the list
         And the quest list is exactly as follows:
-            | Title          | Description                                     | Category    | Time estimate (minutes) | Creation date |
-            | PBR basics     | This tutorial will explain what PBR shading is. | Texturing   | 5 - 10                  | 6 June 2020   |
-            | Blender basics | Learn the basics of blender.                    | 3D modeling | 5 - 10                  | 5 June 2020   |
+            | Title                 | Description                                           | Category         | Time estimate | More info                                                                                                                           |
+            | PBR introduction      | A short introduction to PBR                           | Texturing        | 3 - 5 min     | PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s |
+            | Game genres explained | Every game genre has it charms, learn about them here | Idea exploration | 3 - 5 min     | Every game genre has it charms, learn about them here: https://www.youtube.com/watch?v=DSJvCffJCzE&t=15s                            |
 
 
-    Scenario: Updating a quest with new information
-        When an art director changes the description of the quest with a title of "PBR basics" to
-            "This tutorial will make you a PBR master."
+    Scenario: Updating a quest
+        When an art director updates a quest with the title of "PBR introduction" with the following information:
+            | Title     | Description                                | Category      | Time estimate | More info                                                                                   |
+            | PBR start | This PBR introduction will get you started | PBR Texturing | 5 min         | Get started with PBR using this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s |
+
         Then the quest list is exactly as follows:
-            | Title          | Description                               | Category    | Time estimate (minutes) | Creation date |
-            | PBR basics     | This tutorial will make you a PBR master. | Texturing   | 5 - 10                  | 6 June 2020   |
-            | Blender basics | Learn the basics of blender.              | 3D modeling | 5 - 10                  | 5 June 2020   |
+            | Title                 | Description                                           | Category         | Time estimate | More info                                                                                                |
+            | PBR start             | This PBR introduction will get you started            | PBR Texturing    | 5 min         | Get started with PBR using this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s              |
+            | Game genres explained | Every game genre has it charms, learn about them here | Idea exploration | 3 - 5 min     | Every game genre has it charms, learn about them here: https://www.youtube.com/watch?v=DSJvCffJCzE&t=15s |
+
+        And "Aron" his done list is exactly as follows:
+            | Quest     |
+            | PBR start |
 
 
-    Scenario: Deny updating quests to existing titles
-        When an art director updates the quest with a title of "Blender basics" to "PBR basics"
-        Then the art director should see a quest with a title of "PBR basics" already exists in the list
+    Scenario: Deny updating a quest title to an existing one
+        When an art director updates a quest with the title of "PBR introduction" with the following information:
+            | Title                 | Description      | Category | Time estimate | More info      |
+            | Game genres explained | Some description | Misc     | 5 - 7 min     | Some more info |
+
+        Then the art director should see a quest with a title of "Game genres explained" already exists in the list
         And the quest list is exactly as follows:
-            | Title          | Description                                     | Category    | Time estimate (minutes) | Creation date |
-            | PBR basics     | This tutorial will explain what PBR shading is. | Texturing   | 5 - 10                  | 6 June 2020   |
-            | Blender basics | Learn the basics of blender.                    | 3D modeling | 5 - 10                  | 5 June 2020   |
+            | Title                 | Description                                           | Category         | Time estimate | More info                                                                                                                           |
+            | PBR introduction      | A short introduction to PBR                           | Texturing        | 3 - 5 min     | PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s |
+            | Game genres explained | Every game genre has it charms, learn about them here | Idea exploration | 3 - 5 min     | Every game genre has it charms, learn about them here: https://www.youtube.com/watch?v=DSJvCffJCzE&t=15s                            |
 
 
-    Scenario: Removing a no longer relevant quest
-        When an art director removes a quest with a title of "PBR basics" from the list
-        Then the quest list is exactly as follows:
-            | Title          | Description                  | Category    | Time estimate (minutes) | Creation date |
-            | Blender basics | Learn the basics of blender. | 3D modeling | 5 - 10                  | 5 June 2020   |
+    Scenario: Marking a quest done
+        When "Aron" marks the quest with the title of "Game genres explained" as done
+        Then "Aron" his done list is exactly as follows:
+            | Quest                 |
+            | PBR introduction      |
+            | Game genres explained |
