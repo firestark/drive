@@ -19,7 +19,7 @@
     "require": {
         "behat/behat": "@stable",
         "kahlan/kahlan": "@stable",
-        "mockery/mockery": "^@stable"
+        "mockery/mockery": "@stable"
     },
     "require-dev": {},
     "autoload": {
