@@ -15,7 +15,7 @@ class QuestListContext implements Context
 
     public function __construct()
     {
-        $this->artDirectorManager = new ArtDirectorManager;
+        $this->artDirectorManager = new InMemoryArtDirectorManager;
         $this->questManager = new InMemoryQuestManager($this->artDirectorManager);
     }
 
