@@ -3,6 +3,6 @@ default:
         '': ./features
     suites:
         default:
-            contexts: [ FeatureContext ]
+            contexts: [ QuestListContext ]
             paths:
                 - ../features

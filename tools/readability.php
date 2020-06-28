@@ -9,7 +9,7 @@
 
 function when(string $feature, Closure $action)
 {
-	App::binding($feature, $action);
+	App::bind($feature, $action);
 }
 
 function then($a)
