@@ -16,11 +16,22 @@
             "role": "Developer"
         }
     ],
-    "require": {},
-    "require-dev": {},
+    "require": {
+        "relay/relay": "@stable",
+        "laminas/laminas-diactoros": "@stable",
+        "laminas/laminas-httphandlerrunner": "@stable",
+        "league/route": "@stable"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "@stable",
+        "wikimedia/composer-merge-plugin": "@stable"
+    },
     "autoload": {
         "psr-4": {
-            "": []
+            "": [
+                "facades"
+            ],
+            "Middlewares\\": "middlewares"
         },
         "files": []
     },
@@ -31,5 +42,12 @@
     "config": {
         "preferred-install": "dist"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "extra": {
+        "merge-plugin": {
+            "require": [
+                "../../../../composer.json"
+            ]
+        }
+    }
 }

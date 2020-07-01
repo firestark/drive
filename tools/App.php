@@ -9,7 +9,7 @@ class App
         self::$bindings[$key] = $action;
     }
 
-    public static function make(string $key, array $parameters)
+    public static function make(string $key, array $parameters = [])
     {
         return call_user_func_array(self::$bindings[$key], $parameters);
     }
