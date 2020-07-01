@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
 
-class RequestHandler implements Middleware
+class RequestHandlerMiddleware implements Middleware
 {
     private $router = null;
     

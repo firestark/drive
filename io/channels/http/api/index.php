@@ -15,7 +15,8 @@ including(__DIR__ . '/routes');
 $request = \Laminas\Diactoros\ServerRequestFactory::fromGlobals();
 
 $relay = new Relay\Relay([
-    new \Middlewares\RequestHandler($router),
+    new \Middlewares\InputMiddleware,
+    new \Middlewares\RequestHandlerMiddleware($router),
 ]);
 
 $response = $relay->handle($request);

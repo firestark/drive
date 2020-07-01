@@ -2,9 +2,9 @@
 
 use Psr\Http\Message\ResponseInterface;
 
-Route::post('/add', function(): ResponseInterface {
+Route::post('/', function(): ResponseInterface {
     $response = App::make('i want to add a quest', [
-        App::make(Quest::class),
+        App::make(Quest::class, Input::all()),
         App::make(QuestManager::class)
     ]);
 
