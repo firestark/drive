@@ -9,13 +9,12 @@ use Psr\Http\Server\MiddlewareInterface as Middleware;
 
 class InputMiddleware implements Middleware
 {
-   
     public function process(Request $request, Handler $handler): Response
     {
         foreach ($this->parseJson($request) as $key => $value)
             \Input::set($key, $value);
         
-        return $handler->handle ( $request ); 
+        return $handler->handle($request); 
     }
 
     private function parseJson(Request $request): array
