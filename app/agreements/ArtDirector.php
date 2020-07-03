@@ -2,12 +2,14 @@
 
 class ArtDirector
 {
-    public $name = '';
-    public $completed = [];
+    private $name = '';
+    private $completed = [];
+    private $password = '';
 
-    public function __construct(string $name)
+    public function __construct(string $name, string $password)
     {
         $this->name = $name;
+        $this->password = md5($password);
     }
 
     public function complete(string $title)
@@ -23,5 +25,16 @@ class ArtDirector
     public function hasCompleted(string $title): bool
     {
         return in_array($title, $this->completed);
+    }
+
+    public function matches(ArtDirector $artDirector): bool
+    {
+        return $this->name === $artDirector->name and $this->password === $artDirector->password;
+    }
+
+    public function __get(string $property)
+    {
+        if (isset($this->{$property}))
+            return $this->{$property};
     }
 }

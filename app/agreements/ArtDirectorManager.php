@@ -9,4 +9,6 @@ interface ArtDirectorManager
     public function find(string $name): ArtDirector;
 
     public function has(string $name): bool;
+
+    public function identifies(ArtDirector $artDirector): bool;
 }

@@ -27,10 +27,13 @@ abstract class QuestManager
         return true;
     }
 
-    public function remove(string $title)
+    public function remove(string $title): bool
     {
-        if (! $this->isLocked($title))
-            $this->delete($title);
+        if ($this->isLocked($title))
+            return false;
+
+        $this->delete($title);
+        return true;
     }
 
     private function isLocked(string $title): bool

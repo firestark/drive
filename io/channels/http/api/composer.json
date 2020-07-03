@@ -17,10 +17,11 @@
         }
     ],
     "require": {
-        "relay/relay": "@stable",
+        "firebase/php-jwt": "@stable",
         "laminas/laminas-diactoros": "@stable",
         "laminas/laminas-httphandlerrunner": "@stable",
-        "league/route": "@stable"
+        "league/route": "@stable",
+        "relay/relay": "@stable"
     },
     "require-dev": {
         "symfony/var-dumper": "@stable",
@@ -31,7 +32,8 @@
             "": [
                 "facades"
             ],
-            "Middlewares\\": "middlewares"
+            "Middlewares\\": "middlewares",
+            "Services\\": "services"
         },
         "files": []
     },

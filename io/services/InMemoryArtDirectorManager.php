@@ -26,4 +26,12 @@ class InMemoryArtDirectorManager implements ArtDirectorManager
     {
         return isset($this->artDirectors[$name]);
     }
+
+    public function identifies(ArtDirector $artDirector): bool
+    {
+        if (! $this->has($artDirector->name))
+            return false;
+
+        return $this->artDirectors[$artDirector->name]->matches($artDirector);
+    }
 }

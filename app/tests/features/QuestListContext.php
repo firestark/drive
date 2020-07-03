@@ -24,7 +24,7 @@ class QuestListContext implements Context
      */
     public function anArtDirectorCalledExists(string $name)
     {
-        $this->artDirectorManager->add(new ArtDirector($name));
+        $this->artDirectorManager->add(new ArtDirector($name, ''));
     }
 
     /**

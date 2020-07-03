@@ -17,4 +17,14 @@ class Response
             'X-App-Status' => Status::matched()
         ]);
     }
+
+    public static function forbidden(): JsonResponse
+    {
+        return new JsonResponse([], 403);
+    }
+
+    public static function unauthorized(): JsonResponse
+    {
+        return new JsonResponse([], 401);
+    }
 }
