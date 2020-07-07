@@ -1,8 +1,4 @@
-module Quest exposing (Quest, list, mocks)
-
-import Element exposing (Element)
-import Material.List as List
-import Theme exposing (Theme)
+module Quest exposing (Quest, mocks)
 
 
 type alias Quest =
@@ -22,19 +18,6 @@ mocks =
 
 texturingList : List Quest
 texturingList =
-    [ Quest "PBR introduction" "A short introduction to PBR" "Texturing" "4 min" "more info"
-    , Quest "PBR basics" "The basics of PBR usage is explained here" "Texturing" "10 min" "more info"
+    [ Quest "PBR introduction" "A short introduction to PBR" "Texturing" "4 min" "PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s"
+    , Quest "PBR basics" "The basics of PBR usage is explained here" "Texturing" "10 min" "PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=_LaVvGlkBDs"
     ]
-
-
-list : Theme -> List Quest -> Element msg
-list theme quests =
-    List.threeLine theme <| List.map toItem quests
-
-
-toItem : Quest -> List.Item
-toItem quest =
-    { first = quest.title
-    , second = quest.description
-    , url = Nothing
-    }
