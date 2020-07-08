@@ -113,16 +113,16 @@ toTheme : Model -> Theme
 toTheme page =
     case page of
         Redirect _ ->
-            Theme.dark
+            Theme.light
 
         NotFound _ ->
-            Theme.dark
+            Theme.light
 
         Login _ ->
-            Theme.dark
+            Theme.light
 
         Register _ ->
-            Theme.dark
+            Theme.light
 
         QuestList quests ->
             QuestList.toTheme quests
@@ -141,14 +141,11 @@ changeRouteTo maybeRoute model =
         Nothing ->
             ( NotFound session, Cmd.none )
 
-        Just Route.Root ->
-            ( model, Route.replaceUrl (Session.navKey session) Route.QuestList )
-
         Just Route.Logout ->
             ( model, Api.logout )
 
         Just Route.Login ->
-            Login.init session
+            Login.init session theme
                 |> updateWith Login GotLoginMsg model
 
         Just Route.Register ->

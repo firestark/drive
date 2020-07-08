@@ -1,8 +1,7 @@
-module Api.Endpoint exposing (Endpoint, articles, follow, login, profiles, request, tags, user, users)
+module Api.Endpoint exposing (Endpoint, login, quests, request, user, users)
 
 import Http
 import Url.Builder exposing (QueryParameter)
-import Username exposing (Username)
 
 
 {-| Http.request, except it takes an Endpoint instead of a Url.
@@ -51,8 +50,8 @@ url : List String -> List QueryParameter -> Endpoint
 url paths queryParams =
     -- NOTE: Url.Builder takes care of percent-encoding special URL characters.
     -- See https://package.elm-lang.org/packages/elm/url/latest/Url#percentEncode
-    Url.Builder.crossOrigin "https://conduit.productionready.io"
-        ("api" :: paths)
+    Url.Builder.crossOrigin "localhost:8000"
+        paths
         queryParams
         |> Endpoint
 
@@ -76,26 +75,6 @@ users =
     url [ "users" ] []
 
 
-follow : Username -> Endpoint
-follow uname =
-    url [ "profiles", Username.toString uname, "follow" ] []
-
-
-
--- ARTICLE ENDPOINTS
-
-
-
-articles : List QueryParameter -> Endpoint
-articles params =
-    url [ "articles" ] params
-
-
-profiles : Username -> Endpoint
-profiles uname =
-    url [ "profiles", Username.toString uname ] []
-
-
-tags : Endpoint
-tags =
-    url [ "tags" ] []
+quests : Endpoint
+quests =
+    url [ "" ] []

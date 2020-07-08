@@ -1,4 +1,4 @@
-module Material.Icons exposing (account_circle, add, add_circle, arrow_back, check, delete, edit, highlight, info, play_arrow, save, search)
+module Material.Icons exposing (account_circle, add, add_circle, arrow_back, check, delete, edit, highlight, info, lock, play_arrow, save, search)
 
 import Element exposing (Element)
 import Svg exposing (g, rect, svg)
@@ -105,6 +105,13 @@ info =
             [ Svg.path [ d "M0 0h24v24H0z", fill "none" ] []
             , Svg.path [ d "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" ] []
             ]
+
+
+lock : Element msg
+lock =
+    Element.html <|
+        svg [ height "24", viewBox "0 0 24 24", width "24", fill "currentColor" ]
+            [ Svg.path [ d "M0 0h24v24H0z", fill "none" ] [], Svg.path [ d "M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" ] [] ]
 
 
 play_arrow : Element msg

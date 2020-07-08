@@ -4,14 +4,20 @@ module Page.Login exposing (Model, Msg, init, subscriptions, toSession, update, 
 -}
 
 import Api
-import Html exposing (Html, a, button, div, fieldset, h1, input, li, p, text, ul)
-import Html.Attributes exposing (class, placeholder, type_, value)
-import Html.Events exposing (onInput, onSubmit)
+import Element exposing (Element, column, fill, height, paddingXY, px, rgb255, rgba255, row, spacing, text, width)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
+import Html exposing (Html)
 import Http
 import Json.Decode exposing (string)
 import Json.Encode as Encode
+import Material.Icons as Icons
+import Page
 import Route
 import Session exposing (Session)
+import Theme exposing (Theme)
 import Viewer exposing (Viewer)
 
 
@@ -23,6 +29,7 @@ type alias Model =
     { session : Session
     , problems : List Problem
     , form : Form
+    , theme : Theme
     }
 
 
@@ -61,14 +68,15 @@ type alias Form =
     }
 
 
-init : Session -> ( Model, Cmd msg )
-init session =
+init : Session -> Theme -> ( Model, Cmd msg )
+init session theme =
     ( { session = session
       , problems = []
       , form =
             { email = ""
             , password = ""
             }
+      , theme = theme
       }
     , Cmd.none
     )
@@ -81,64 +89,70 @@ init session =
 view : Model -> { title : String, content : Html Msg }
 view model =
     { title = "Login"
-    , content =
-        div [ class "cred-page" ]
-            [ div [ class "container page" ]
-                [ div [ class "row" ]
-                    [ div [ class "col-md-6 offset-md-3 col-xs-12" ]
-                        [ h1 [ class "text-xs-center" ] [ text "Sign in" ]
-                        , p [ class "text-xs-center" ]
-                            [ a [ Route.href Route.Register ]
-                                [ text "Need an account?" ]
-                            ]
-                        , ul [ class "error-messages" ]
-                            (List.map viewProblem model.problems)
-                        , viewForm model.form
-                        ]
-                    ]
-                ]
-            ]
+    , content = body model
     }
 
 
-viewProblem : Problem -> Html msg
-viewProblem problem =
-    let
-        errorMessage =
-            case problem of
-                InvalidEntry _ str ->
-                    str
-
-                ServerError str ->
-                    str
-    in
-    li [] [ text errorMessage ]
-
-
-viewForm : Form -> Html Msg
-viewForm form =
-    Html.form [ onSubmit SubmittedForm ]
-        [ fieldset [ class "form-group" ]
-            [ input
-                [ class "form-control form-control-lg"
-                , placeholder "Email"
-                , onInput EnteredEmail
-                , value form.email
-                ]
-                []
+body : Model -> Html Msg
+body model =
+    Page.wrapper model.theme.background <|
+        column [ paddingXY 24 0, width fill, spacing 24 ]
+            [ inputUsername model
+            , inputPassword model
             ]
-        , fieldset [ class "form-group" ]
-            [ input
-                [ class "form-control form-control-lg"
-                , type_ "password"
-                , placeholder "Password"
-                , onInput EnteredPassword
-                , value form.password
-                ]
-                []
+
+
+inputUsername : Model -> Element Msg
+inputUsername model =
+    row
+        [ height (px 48)
+        , width fill
+        , Border.rounded 4
+        , Border.width 0
+        , Background.color (rgba255 0 0 0 0.07)
+        , Element.paddingXY 16 0
+        , spacing 16
+        ]
+        [ Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.account_circle
+        , Input.text
+            [ Font.size 16
+            , Font.light
+            , Font.color (rgba255 0 0 0 0.38)
+            , Border.width 0
+            , Background.color (rgba255 0 0 0 0)
             ]
-        , button [ class "btn btn-lg btn-primary pull-xs-right" ]
-            [ text "Sign in" ]
+            { onChange = EnteredEmail
+            , text = model.form.email
+            , placeholder = Just <| Input.placeholder [] (text "Username*")
+            , label = Input.labelHidden ""
+            }
+        ]
+
+
+inputPassword : Model -> Element Msg
+inputPassword model =
+    row
+        [ height (px 48)
+        , width fill
+        , Border.rounded 4
+        , Border.width 0
+        , Background.color (rgba255 0 0 0 0.07)
+        , Element.paddingXY 16 0
+        , spacing 16
+        ]
+        [ Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.lock
+        , Input.text
+            [ Font.size 16
+            , Font.light
+            , Font.color (rgba255 0 0 0 0.38)
+            , Border.width 0
+            , Background.color (rgba255 0 0 0 0)
+            ]
+            { onChange = EnteredEmail
+            , text = model.form.email
+            , placeholder = Just <| Input.placeholder [] (text "Password*")
+            , label = Input.labelHidden ""
+            }
         ]
 
 
@@ -297,11 +311,11 @@ login (Trimmed form) =
                 , ( "password", Encode.string form.password )
                 ]
 
-        body =
+        body1 =
             Encode.object [ ( "user", user ) ]
                 |> Http.jsonBody
     in
-    Api.login body Viewer.decoder
+    Api.login body1 Viewer.decoder
 
 
 

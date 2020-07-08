@@ -12,8 +12,7 @@ import Url.Parser as Parser exposing (Parser, oneOf, s)
 
 
 type Route
-    = Root
-    | Login
+    = Login
     | Logout
     | Register
     | QuestList
@@ -58,16 +57,13 @@ fromUrl url =
 
 routeToString : Route -> String
 routeToString page =
-    "#/" ++ String.join "/" (routeToPieces page)
+    "/#/" ++ String.join "/" (routeToPieces page)
 
 
 routeToPieces : Route -> List String
 routeToPieces page =
     case page of
         QuestList ->
-            []
-
-        Root ->
             []
 
         Login ->

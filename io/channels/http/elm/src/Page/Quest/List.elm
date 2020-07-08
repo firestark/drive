@@ -35,7 +35,6 @@ type Dialog
 type Msg
     = CloseDialog
     | OpenDialog String String
-    | SwitchTheme
     | UpdateSearch String
 
 
@@ -44,7 +43,7 @@ init session theme =
     ( { theme = theme
       , session = session
       , searchText = ""
-      , questList = Quest.mocks
+      , questList = sort Quest.mocks
       , dialog = Closed
       }
     , Cmd.none
@@ -60,9 +59,6 @@ update msg model =
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
 
-        SwitchTheme ->
-            ( { model | theme = Theme.switch model.theme.kind }, Cmd.none )
-
         UpdateSearch text ->
             ( { model | searchText = text }, Cmd.none )
 
@@ -77,11 +73,82 @@ toTheme model =
     model.theme
 
 
+sort : List Quest -> List ( String, List Quest )
+sort quests =
+    let
+        duplicateItemList =
+            List.map toItem quests
+    in
+    List.foldr foldFunction [] duplicateItemList
+
+
+toItem : Quest -> ( String, Quest )
+toItem quest =
+    ( quest.category, quest )
+
+
+foldFunction : ( String, Quest ) -> List ( String, List Quest ) -> List ( String, List Quest )
+foldFunction ( category, quest ) sortedItems =
+    case List.head <| List.filter (isSameCategory category) sortedItems of
+        Nothing ->
+            ( category, [ quest ] ) :: sortedItems
+
+        Just ( itemCategory, questList ) ->
+            ( itemCategory, quest :: questList ) :: List.filter (isNotSameCategory category) sortedItems
+
+
+isSameCategory : String -> ( String, List Quest ) -> Bool
+isSameCategory category ( itemCategory, _ ) =
+    category == itemCategory
+
+
+isNotSameCategory : String -> ( String, List Quest ) -> Bool
+isNotSameCategory category ( itemCategory, _ ) =
+    category /= itemCategory
+
+
+
+-- view
+
+
 view : Model -> { title : String, content : Html Msg }
 view model =
     { title = "Quests"
     , content = body model
     }
+
+
+body : Model -> Html Msg
+body model =
+    Page.wrapper model.theme.background <|
+        column
+            [ width fill
+            , height fill
+            , Element.onRight <| fab model.theme
+            , Element.inFront <|
+                case model.dialog of
+                    Open { title, moreInfo } ->
+                        dialog model.theme CloseDialog title moreInfo
+
+                    Closed ->
+                        Element.none
+            ]
+            [ topAppBar model
+            , column
+                [ width <| maximum 1200 fill
+                , height fill
+                , centerX
+                , scrollbarY
+                , Element.paddingEach
+                    { top = 0
+                    , right = 0
+                    , bottom = 72
+                    , left = 0
+                    }
+                ]
+              <|
+                List.map (list model.theme) model.questList
+            ]
 
 
 topAppBar : Model -> Element Msg
@@ -144,38 +211,6 @@ input model =
             }
         , Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.account_circle
         ]
-
-
-body : Model -> Html Msg
-body model =
-    Page.wrapper model.theme.background <|
-        column
-            [ width fill
-            , height fill
-            , Element.onRight <| fab model.theme
-            , case model.dialog of
-                Open { title, moreInfo } ->
-                    Element.inFront (dialog model.theme CloseDialog title moreInfo)
-
-                Closed ->
-                    Element.inFront <| Element.text ""
-            ]
-            [ topAppBar model
-            , column
-                [ width <| maximum 1200 fill
-                , height fill
-                , centerX
-                , scrollbarY
-                , Element.paddingEach
-                    { top = 0
-                    , right = 0
-                    , bottom = 72
-                    , left = 0
-                    }
-                ]
-              <|
-                List.map (list model.theme) model.questList
-            ]
 
 
 
@@ -305,7 +340,7 @@ threeElement theme quest =
                     }
                 ]
                 [ Element.el [ Element.alignRight, Element.alignTop, Font.color (Theme.highlight theme.kind 0.54), onClick (OpenDialog quest.title quest.moreInfo), Element.pointer ] Icons.info
-                , Element.el [ Element.alignRight, Element.alignBottom, Font.size 12, Font.color (Theme.highlight theme.kind 0.54) ] <| Element.text "5 min"
+                , Element.el [ Element.alignRight, Element.alignBottom, Font.size 12, Font.color (Theme.highlight theme.kind 0.54) ] <| Element.text quest.timeEstimate
                 ]
             ]
         ]
