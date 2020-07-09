@@ -11,6 +11,7 @@ use Services\Guard;
 class AuthenticationMiddleware implements Middleware
 {
     private $guard = null;
+    private $allowed = [];
 
     public function __construct(Guard $guard)
     {
@@ -21,7 +22,7 @@ class AuthenticationMiddleware implements Middleware
     {
         $token = $request->getHeaderLine('Authorization');
 
-        if (! $this->guard->validate($token))
+        if (! $this->guard->allows($request, $token))
             return $this->deny($request);
         
         $response = $handler->handle($request);

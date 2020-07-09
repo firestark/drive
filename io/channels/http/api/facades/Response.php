@@ -7,6 +7,7 @@ class Response
     public static function ok($data): JsonResponse
     {
         return new JsonResponse($data, 200, [
+            'Access-Control-Allow-Origin' => '*',
             'X-App-Status' => Status::matched()
         ]);
     }
@@ -14,6 +15,7 @@ class Response
     public static function conflict($data): JsonResponse
     {
         return new JsonResponse($data, 409, [
+            'Access-Control-Allow-Origin' => '*',
             'X-App-Status' => Status::matched()
         ]);
     }
