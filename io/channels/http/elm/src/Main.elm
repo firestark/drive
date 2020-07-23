@@ -9,6 +9,7 @@ import Element.Font as Font
 import Html exposing (Html)
 import Json.Decode exposing (Value)
 import Page.Login
+import Page.Quest.List
 import Theme
 import Url exposing (Url)
 import Viewer exposing (Viewer)
@@ -22,6 +23,7 @@ type Model
 type alias Data =
     { key : Browser.Navigation.Key
     , url : Url
+    , questPage : Page.Quest.List.Model
     }
 
 
@@ -33,22 +35,28 @@ type Msg
 
 type SubMsg
     = LinkClicked Browser.UrlRequest
+    | GotQuestListMsg Page.Quest.List.Msg
     | UrlChanged Url
 
 
 init : Maybe Viewer -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
+    let
+        theme =
+            Theme.light
+    in
     case maybeViewer of
         Just _ ->
             ( Authenticated
                 { key = navKey
                 , url = url
+                , questPage = Tuple.first <| Page.Quest.List.init theme
                 }
             , Cmd.none
             )
 
         Nothing ->
-            ( Unauthenticated (Page.Login.init navKey url Theme.light), Cmd.none )
+            ( Unauthenticated (Page.Login.init navKey url theme), Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -81,6 +89,7 @@ update msg model =
                             ( Authenticated
                                 { key = loginModel.key
                                 , url = loginModel.url
+                                , questPage = Tuple.first <| Page.Quest.List.init loginModel.theme
                                 }
                             , Cmd.none
                             )
@@ -99,6 +108,9 @@ updateAuthenticated msg model =
 
                 Browser.External href ->
                     ( Authenticated model, Browser.Navigation.load href )
+
+        GotQuestListMsg subMsg ->
+            ( Authenticated { model | questPage = Tuple.first (Page.Quest.List.update subMsg model.questPage) }, Cmd.none )
 
         UrlChanged url ->
             ( Authenticated { model | url = url }
@@ -142,7 +154,7 @@ view model =
 
         Authenticated data ->
             { title = "My title"
-            , body = [ Element.layout [] <| viewBody data ]
+            , body = [ wrapper data.questPage.theme.background <| Element.map (AuthenticatedMsg << GotQuestListMsg) (Page.Quest.List.view data.questPage) ]
             }
 
 
@@ -160,27 +172,3 @@ wrapper background element =
             ]
         ]
         element
-
-
-viewBody : Data -> Element msg
-viewBody data =
-    Element.column []
-        [ Element.text <| "The current url is " ++ Url.toString data.url
-        , links
-        ]
-
-
-links : Element msg
-links =
-    Element.row []
-        [ link "/home" "home"
-        , link "/profile" "profile"
-        ]
-
-
-link : String -> String -> Element msg
-link url label =
-    Element.link []
-        { url = url
-        , label = Element.text label
-        }
