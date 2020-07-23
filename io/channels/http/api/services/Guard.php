@@ -16,8 +16,13 @@ class Guard
      * @var $public
      * All the publicly accessible routes.
      */
-    private $public = [ 
-        'POST' => ['/authenticate']
+    private $public = [
+        'OPTIONS' => ['/authenticate'],
+        'GET' => [],
+        'POST' => ['/authenticate'],
+        'PUT' => [],
+        'PATCH' => [],
+        'DELETE' => []
     ];
 
     public function __construct(ArtDirectorManager $artDirectorManager)

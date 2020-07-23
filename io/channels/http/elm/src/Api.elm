@@ -1,6 +1,6 @@
 port module Api exposing (Cred, addServerError, application, decodeErrors, delete, get, login, logout, post, put, register, settings, storeCredWith, username, viewerChanges)
 
-{-| This module is responsible for communicating to the Conduit API.
+{-| This module is responsible for communicating to the API.
 
 It exposes an opaque Endpoint type which is guaranteed to point to the correct URL.
 
@@ -48,7 +48,7 @@ username (Cred val _) =
 
 credHeader : Cred -> Http.Header
 credHeader (Cred _ token) =
-    Http.header "authorization" token
+    Http.header "authorization" ("Token " ++ token)
 
 
 {-| It's important that this is never exposed!
@@ -87,13 +87,13 @@ decodeFromChange viewerDecoder val =
 
 
 storeCredWith : Cred -> Avatar -> Cmd msg
-storeCredWith (Cred uname token) avatar =
+storeCredWith (Cred name token) avatar =
     let
         json =
             Encode.object
                 [ ( "user"
                   , Encode.object
-                        [ ( "username", Username.encode uname )
+                        [ ( "username", Username.encode name )
                         , ( "token", Encode.string token )
                         , ( "image", Avatar.encode avatar )
                         ]
@@ -157,12 +157,10 @@ storageDecoder viewerDecoder =
 -- HTTP
 
 
-get : Endpoint -> Maybe Cred -> Decoder a -> Http.Request a
-get url maybeCred decoder =
+get : Endpoint -> Maybe Cred -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
+get url maybeCred msg decoder =
     Endpoint.request
         { method = "GET"
-        , url = url
-        , expect = Http.expectJson decoder
         , headers =
             case maybeCred of
                 Just cred ->
@@ -170,31 +168,31 @@ get url maybeCred decoder =
 
                 Nothing ->
                     []
+        , url = url
         , body = Http.emptyBody
+        , expect = Http.expectJson msg decoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
 
 
-put : Endpoint -> Cred -> Body -> Decoder a -> Http.Request a
-put url cred body decoder =
+put : Endpoint -> Cred -> (Result Http.Error a -> msg) -> Body -> Decoder a -> Cmd msg
+put url cred msg body decoder =
     Endpoint.request
         { method = "PUT"
-        , url = url
-        , expect = Http.expectJson decoder
         , headers = [ credHeader cred ]
+        , url = url
         , body = body
+        , expect = Http.expectJson msg decoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
 
 
-post : Endpoint -> Maybe Cred -> Body -> Decoder a -> Http.Request a
-post url maybeCred body decoder =
+post : Endpoint -> Maybe Cred -> (Result Http.Error a -> msg) -> Body -> Decoder a -> Cmd msg
+post url maybeCred msg body decoder =
     Endpoint.request
         { method = "POST"
-        , url = url
-        , expect = Http.expectJson decoder
         , headers =
             case maybeCred of
                 Just cred ->
@@ -202,38 +200,40 @@ post url maybeCred body decoder =
 
                 Nothing ->
                     []
+        , url = url
         , body = body
+        , expect = Http.expectJson msg decoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
 
 
-delete : Endpoint -> Cred -> Body -> Decoder a -> Http.Request a
-delete url cred body decoder =
+delete : Endpoint -> Cred -> (Result Http.Error a -> msg) -> Body -> Decoder a -> Cmd msg
+delete url cred msg body decoder =
     Endpoint.request
         { method = "DELETE"
-        , url = url
-        , expect = Http.expectJson decoder
         , headers = [ credHeader cred ]
+        , url = url
         , body = body
+        , expect = Http.expectJson msg decoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
 
 
-login : Http.Body -> Decoder (Cred -> a) -> Http.Request a
-login body decoder =
-    post Endpoint.login Nothing body (Decode.field "user" (decoderFromCred decoder))
+login : Http.Body -> (Result Http.Error a -> msg) -> Decoder (Cred -> a) -> Cmd msg
+login body msg decoder =
+    post Endpoint.login Nothing msg body (Decode.field "user" (decoderFromCred decoder))
 
 
-register : Http.Body -> Decoder (Cred -> a) -> Http.Request a
-register body decoder =
-    post Endpoint.users Nothing body (Decode.field "user" (decoderFromCred decoder))
+register : Http.Body -> (Result Http.Error a -> msg) -> Decoder (Cred -> a) -> Cmd msg
+register body msg decoder =
+    post Endpoint.users Nothing msg body (Decode.field "user" (decoderFromCred decoder))
 
 
-settings : Cred -> Http.Body -> Decoder (Cred -> a) -> Http.Request a
-settings cred body decoder =
-    put Endpoint.user cred body (Decode.field "user" (decoderFromCred decoder))
+settings : Cred -> Http.Body -> (Result Http.Error a -> msg) -> Decoder (Cred -> a) -> Cmd msg
+settings cred body msg decoder =
+    put Endpoint.user cred msg body (Decode.field "user" (decoderFromCred decoder))
 
 
 decoderFromCred : Decoder (Cred -> a) -> Decoder a
@@ -257,21 +257,27 @@ addServerError list =
 decodeErrors : Http.Error -> List String
 decodeErrors error =
     case error of
-        Http.BadStatus response ->
-            response.body
-                |> decodeString (field "errors" errorsDecoder)
-                |> Result.withDefault [ "Server error" ]
+        Http.BadBody explanation ->
+            [ "The server responded with something unexpected. Reason: " ++ explanation ]
 
-        _ ->
-            [ "Server error" ]
+        Http.BadUrl _ ->
+            [ "Invalid url" ]
+
+        Http.BadStatus statusCode ->
+            [ "Request failed with status code: " ++ String.fromInt statusCode ]
+
+        Http.NetworkError ->
+            [ "Unable to reach server." ]
+
+        Http.Timeout ->
+            [ "Server is taking too long to respond. Please try again later." ]
 
 
-errorsDecoder : Decoder (List String)
-errorsDecoder =
-    Decode.keyValuePairs (Decode.list Decode.string)
-        |> Decode.map (List.concatMap fromPair)
 
-
-fromPair : ( String, List String ) -> List String
-fromPair ( field, errors ) =
-    List.map (\error -> field ++ " " ++ error) errors
+-- errorsDecoder : Decoder (List String)
+-- errorsDecoder =
+--     Decode.keyValuePairs (Decode.list Decode.string)
+--         |> Decode.map (List.concatMap fromPair)
+-- fromPair : ( String, List String ) -> List String
+-- fromPair ( field, errors ) =
+--     List.map (\error -> field ++ " " ++ error) errors

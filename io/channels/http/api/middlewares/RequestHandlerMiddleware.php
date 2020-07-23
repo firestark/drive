@@ -19,6 +19,9 @@ class RequestHandlerMiddleware implements Middleware
     
     public function process(Request $request, Handler $handler): Response
     {
+        if ( $request->getMethod() === 'OPTIONS')
+            return \Response::ok([]);
+
         return $this->router->dispatch($request);        
     }
 }

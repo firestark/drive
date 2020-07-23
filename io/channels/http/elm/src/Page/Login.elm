@@ -1,213 +1,117 @@
-module Page.Login exposing (Model, Msg, init, subscriptions, toSession, update, view)
-
-{-| The login page.
--}
+module Page.Login exposing (Model, Msg, init, update, view)
 
 import Api
-import Element exposing (Element, column, fill, height, paddingXY, px, rgb255, rgba255, row, spacing, text, width)
+import Browser.Navigation
+import Element exposing (Element, column, fill, height, paddingXY, px, rgba255, row, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input
-import Html exposing (Html)
 import Http
-import Json.Decode exposing (string)
 import Json.Encode as Encode
+import Material.Elevation as Elevation
 import Material.Icons as Icons
-import Page
-import Route
-import Session exposing (Session)
+import Process
+import Task
 import Theme exposing (Theme)
+import Url exposing (Url)
 import Viewer exposing (Viewer)
 
 
-
--- MODEL
-
-
 type alias Model =
-    { session : Session
+    { form : Form
+    , key : Browser.Navigation.Key
     , problems : List Problem
-    , form : Form
+    , showPassword : Bool
+    , showSnackbar : Bool
     , theme : Theme
+    , url : Url
     }
 
 
-{-| Recording validation problems on a per-field basis facilitates displaying
-them inline next to the field where the error occurred.
-
-I implemented it this way out of habit, then realized the spec called for
-displaying all the errors at the top. I thought about simplifying it, but then
-figured it'd be useful to show how I would normally model this data - assuming
-the intended UX was to render errors per field.
-
-(The other part of this is having a view function like this:
-
-viewFieldErrors : ValidatedField -> List Problem -> Html msg
-
-...and it filters the list of problems to render only InvalidEntry ones for the
-given ValidatedField. That way you can call this:
-
-viewFieldErrors Email problems
-
-...next to the `email` field, and call `viewFieldErrors Password problems`
-next to the `password` field, and so on.
-
-The `LoginError` should be displayed elsewhere, since it doesn't correspond to
-a particular field.
-
--}
 type Problem
     = InvalidEntry ValidatedField String
     | ServerError String
 
 
 type alias Form =
-    { email : String
+    { name : String
     , password : String
     }
 
 
-init : Session -> Theme -> ( Model, Cmd msg )
-init session theme =
-    ( { session = session
-      , problems = []
-      , form =
-            { email = ""
-            , password = ""
-            }
-      , theme = theme
-      }
-    , Cmd.none
-    )
-
-
-
--- VIEW
-
-
-view : Model -> { title : String, content : Html Msg }
-view model =
-    { title = "Login"
-    , content = body model
+init : Browser.Navigation.Key -> Url -> Theme -> Model
+init key url theme =
+    { form = Form "" ""
+    , key = key
+    , problems = []
+    , showPassword = False
+    , showSnackbar = False
+    , theme = theme
+    , url = url
     }
 
 
-body : Model -> Html Msg
-body model =
-    Page.wrapper model.theme.background <|
-        column [ paddingXY 24 0, width fill, spacing 24 ]
-            [ inputUsername model
-            , inputPassword model
-            ]
-
-
-inputUsername : Model -> Element Msg
-inputUsername model =
-    row
-        [ height (px 48)
-        , width fill
-        , Border.rounded 4
-        , Border.width 0
-        , Background.color (rgba255 0 0 0 0.07)
-        , Element.paddingXY 16 0
-        , spacing 16
-        ]
-        [ Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.account_circle
-        , Input.text
-            [ Font.size 16
-            , Font.light
-            , Font.color (rgba255 0 0 0 0.38)
-            , Border.width 0
-            , Background.color (rgba255 0 0 0 0)
-            ]
-            { onChange = EnteredEmail
-            , text = model.form.email
-            , placeholder = Just <| Input.placeholder [] (text "Username*")
-            , label = Input.labelHidden ""
-            }
-        ]
-
-
-inputPassword : Model -> Element Msg
-inputPassword model =
-    row
-        [ height (px 48)
-        , width fill
-        , Border.rounded 4
-        , Border.width 0
-        , Background.color (rgba255 0 0 0 0.07)
-        , Element.paddingXY 16 0
-        , spacing 16
-        ]
-        [ Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.lock
-        , Input.text
-            [ Font.size 16
-            , Font.light
-            , Font.color (rgba255 0 0 0 0.38)
-            , Border.width 0
-            , Background.color (rgba255 0 0 0 0)
-            ]
-            { onChange = EnteredEmail
-            , text = model.form.email
-            , placeholder = Just <| Input.placeholder [] (text "Password*")
-            , label = Input.labelHidden ""
-            }
-        ]
-
-
-
--- UPDATE
-
-
 type Msg
-    = SubmittedForm
-    | EnteredEmail String
+    = CompletedLogin (Result Http.Error Viewer)
+    | EnteredName String
     | EnteredPassword String
-    | CompletedLogin (Result Http.Error Viewer)
-    | GotSession Session
+    | HideSnackbar
+    | ShowPasswordToggled
+    | ShowSnackbar
+    | SubmittedForm
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        CompletedLogin (Err error) ->
+            let
+                serverErrors =
+                    Api.decodeErrors error
+                        |> List.map ServerError
+
+                newModel =
+                    { model | problems = List.append model.problems serverErrors }
+            in
+            update ShowSnackbar newModel
+
+        CompletedLogin (Ok viewer) ->
+            ( model
+            , Cmd.batch
+                [ Viewer.store viewer
+
+                -- , Browser.Navigation.pushUrl model.key "http://localhost:8000/home"
+                ]
+            )
+
+        EnteredName name ->
+            updateForm (\form -> { form | name = name }) model
+
+        EnteredPassword password ->
+            updateForm (\form -> { form | password = password }) model
+
+        HideSnackbar ->
+            ( { model | showSnackbar = False }, Cmd.none )
+
+        ShowPasswordToggled ->
+            ( { model | showPassword = not model.showPassword }, Cmd.none )
+
+        ShowSnackbar ->
+            ( { model | showSnackbar = True }, delay 5000 HideSnackbar )
+
         SubmittedForm ->
             case validate model.form of
                 Ok validForm ->
                     ( { model | problems = [] }
-                    , Http.send CompletedLogin (login validForm)
+                    , login validForm
                     )
 
                 Err problems ->
                     ( { model | problems = problems }
                     , Cmd.none
                     )
-
-        EnteredEmail email ->
-            updateForm (\form -> { form | email = email }) model
-
-        EnteredPassword password ->
-            updateForm (\form -> { form | password = password }) model
-
-        CompletedLogin (Err error) ->
-            let
-                serverErrors =
-                    Api.decodeErrors error
-                        |> List.map ServerError
-            in
-            ( { model | problems = List.append model.problems serverErrors }
-            , Cmd.none
-            )
-
-        CompletedLogin (Ok viewer) ->
-            ( model
-            , Viewer.store viewer
-            )
-
-        GotSession session ->
-            ( { model | session = session }
-            , Route.replaceUrl (Session.navKey session) Route.QuestList
-            )
 
 
 {-| Helper function for `update`. Updates the form and returns Cmd.none.
@@ -218,13 +122,164 @@ updateForm transform model =
     ( { model | form = transform model.form }, Cmd.none )
 
 
+delay : Float -> msg -> Cmd msg
+delay time msg =
+    Process.sleep time
+        |> Task.perform (\_ -> msg)
 
--- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
+-- View
+
+
+view : Model -> Element Msg
+view model =
+    column
+        [ paddingXY 24 80
+        , width fill
+        , spacing 16
+        , Element.alignBottom
+        , Element.inFront <|
+            if model.showSnackbar then
+                snackbar
+
+            else
+                Element.none
+        ]
+        [ inputName model
+        , inputPassword model
+        , loginButton model.theme
+        ]
+
+
+inputName : Model -> Element Msg
+inputName model =
+    column [ width fill ]
+        [ row
+            [ height (px 56)
+            , width fill
+            , Border.rounded 4
+            , Border.width 0
+            , Background.color (rgba255 0 0 0 0.07)
+            , Element.paddingXY 16 0
+            , spacing 16
+            ]
+            [ Element.el [ Font.color <| Theme.highlight model.theme.kind 0.54 ] Icons.account_circle
+            , Input.text
+                [ Font.size 16
+                , Font.light
+                , Font.color <| Theme.highlight model.theme.kind 0.38
+                , Border.width 0
+                , Background.color (rgba255 0 0 0 0)
+                ]
+                { onChange = EnteredName
+                , text = model.form.name
+                , placeholder = Just <| Input.placeholder [] (text "Name*")
+                , label = Input.labelHidden ""
+                }
+            ]
+        , viewFieldErrors model.theme Name model.problems
+        ]
+
+
+inputPassword : Model -> Element Msg
+inputPassword model =
+    column []
+        [ row
+            [ height (px 56)
+            , width fill
+            , Border.rounded 4
+            , Border.width 0
+            , Background.color (rgba255 0 0 0 0.07)
+            , Element.paddingXY 16 0
+            , spacing 16
+            ]
+            [ Element.el [ Font.color <| Theme.highlight model.theme.kind 0.54 ] Icons.lock
+            , Input.newPassword
+                [ Font.size 16
+                , Font.light
+                , Font.color <| Theme.highlight model.theme.kind 0.38
+                , Border.width 0
+                , Background.color (rgba255 0 0 0 0)
+                ]
+                { onChange = EnteredPassword
+                , text = model.form.password
+                , placeholder = Just <| Input.placeholder [] (text "Password*")
+                , label = Input.labelHidden ""
+                , show = model.showPassword
+                }
+            , Element.el [ Font.color <| Theme.highlight model.theme.kind 0.54, onClick ShowPasswordToggled ] Icons.visibility
+            ]
+        , viewFieldErrors model.theme Password model.problems
+        ]
+
+
+inputError : Theme -> String -> Element msg
+inputError theme problem =
+    Element.el [ Font.color theme.error, Font.size 13, paddingXY 16 8, Font.semiBold ] <| text problem
+
+
+viewFieldErrors : Theme -> ValidatedField -> List Problem -> Element msg
+viewFieldErrors theme field problems =
+    let
+        error =
+            List.head <| List.filter (isFieldError field) problems
+    in
+    case error of
+        Just (InvalidEntry _ problem) ->
+            inputError theme problem
+
+        _ ->
+            inputError theme ""
+
+
+isFieldError : ValidatedField -> Problem -> Bool
+isFieldError field problem =
+    case problem of
+        InvalidEntry invalidField _ ->
+            invalidField == field
+
+        ServerError _ ->
+            False
+
+
+loginButton : Theme -> Element Msg
+loginButton theme =
+    Input.button
+        [ Background.color theme.primary
+        , Font.color theme.onPrimary
+        , Font.size 14
+        , Font.bold
+        , Element.alignRight
+        , paddingXY 16 0
+        , height (px 36)
+        , Border.rounded 4
+        ]
+        { onPress = Just SubmittedForm
+        , label = text "LOGIN"
+        }
+
+
+snackbar : Element msg
+snackbar =
+    column
+        [ Element.alignBottom
+        , width fill
+        , paddingXY 8 8
+        ]
+        [ row
+            [ width fill
+            , height (px 48)
+            , Elevation.z5
+            , Background.color (rgba255 51 51 51 1)
+            , Font.color (rgba255 255 240 240 1)
+            , Font.semiBold
+            , Font.size 14
+            , Border.rounded 4
+            , paddingXY 14 16
+            ]
+            [ text "Login failed, wrong credentials." ]
+        ]
 
 
 
@@ -241,13 +296,13 @@ type TrimmedForm
 {-| When adding a variant here, add it to `fieldsToValidate` too!
 -}
 type ValidatedField
-    = Email
+    = Name
     | Password
 
 
 fieldsToValidate : List ValidatedField
 fieldsToValidate =
-    [ Email
+    [ Name
     , Password
     ]
 
@@ -272,9 +327,9 @@ validateField : TrimmedForm -> ValidatedField -> List Problem
 validateField (Trimmed form) field =
     List.map (InvalidEntry field) <|
         case field of
-            Email ->
-                if String.isEmpty form.email then
-                    [ "email can't be blank." ]
+            Name ->
+                if String.isEmpty form.name then
+                    [ "Name can't be blank." ]
 
                 else
                     []
@@ -293,35 +348,18 @@ Instead, trim only on submit.
 trimFields : Form -> TrimmedForm
 trimFields form =
     Trimmed
-        { email = String.trim form.email
+        { name = String.trim form.name
         , password = String.trim form.password
         }
 
 
-
--- HTTP
-
-
-login : TrimmedForm -> Http.Request Viewer
+login : TrimmedForm -> Cmd Msg
 login (Trimmed form) =
     let
         user =
             Encode.object
-                [ ( "email", Encode.string form.email )
+                [ ( "name", Encode.string form.name )
                 , ( "password", Encode.string form.password )
                 ]
-
-        body1 =
-            Encode.object [ ( "user", user ) ]
-                |> Http.jsonBody
     in
-    Api.login body1 Viewer.decoder
-
-
-
--- EXPORT
-
-
-toSession : Model -> Session
-toSession model =
-    model.session
+    Api.login (user |> Http.jsonBody) CompletedLogin Viewer.decoder

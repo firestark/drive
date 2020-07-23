@@ -33,4 +33,9 @@ class Route
     {
         self::$router->map('DELETE', $route, $callback);
     }
+
+    public static function options(string $route, closure $callback)
+    {
+        self::$router->map('OPTIONS', $route, $callback);
+    }
 }
