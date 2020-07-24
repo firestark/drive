@@ -1,16 +1,20 @@
 module Page.Quest.List exposing (Model, Msg, init, toTheme, update, view)
 
+import Api exposing (Cred)
+import Api.Endpoint as Endpoint
 import Element exposing (Element, centerX, centerY, column, el, fill, height, maximum, paddingXY, px, rgb255, rgba255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input exposing (placeholder)
+import Http
 import Material.Dialog exposing (dialog)
 import Material.Elevation as Elevation
 import Material.Fab as Fab
 import Material.Icons as Icons
 import Quest exposing (Quest)
+import RemoteData exposing (WebData)
 import Route
 import Theme exposing (Theme)
 
@@ -18,31 +22,37 @@ import Theme exposing (Theme)
 type alias Model =
     { theme : Theme
     , searchText : String
-    , questList : List ( String, List Quest )
+    , questList : WebData (List Quest)
     , dialog : Dialog
     }
 
 
 type Dialog
-    = Open { title : String, moreInfo : String }
-    | Closed
+    = Closed
+    | Open { title : String, moreInfo : String }
 
 
 type Msg
     = CloseDialog
+    | GotQuests (WebData (List Quest))
     | OpenDialog String String
     | UpdateSearch String
 
 
-init : Theme -> ( Model, Cmd Msg )
-init theme =
+init : Cred -> Theme -> ( Model, Cmd Msg )
+init cred theme =
     ( { theme = theme
       , searchText = ""
-      , questList = sort Quest.mocks
+      , questList = RemoteData.NotAsked
       , dialog = Closed
       }
-    , Cmd.none
+    , request cred
     )
+
+
+request : Cred -> Cmd Msg
+request cred =
+    Api.get Endpoint.quests (Just cred) GotQuests Quest.decoder
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,6 +60,9 @@ update msg model =
     case msg of
         CloseDialog ->
             ( { model | dialog = Closed }, Cmd.none )
+
+        GotQuests response ->
+            ( { model | questList = response }, Cmd.none )
 
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
@@ -103,6 +116,36 @@ isNotSameCategory category ( itemCategory, _ ) =
 
 view : Model -> Element Msg
 view model =
+    case model.questList of
+        RemoteData.NotAsked ->
+            text "You didnt ask me so i will do nothing"
+
+        RemoteData.Loading ->
+            text "Loading..."
+
+        RemoteData.Success quests ->
+            viewQuests model (sort quests)
+
+        RemoteData.Failure error ->
+            case error of
+                Http.BadBody explanation ->
+                    text <| "The server responded with something unexpected. Reason: " ++ explanation
+
+                Http.BadUrl _ ->
+                    text "Invalid url"
+
+                Http.BadStatus statusCode ->
+                    text <| "Request failed with status code: " ++ String.fromInt statusCode
+
+                Http.NetworkError ->
+                    text "Unable to reach server."
+
+                Http.Timeout ->
+                    text "Server is taking too long to respond. Please try again later."
+
+
+viewQuests : Model -> List ( String, List Quest ) -> Element Msg
+viewQuests model quests =
     column
         [ width fill
         , height fill
@@ -129,7 +172,7 @@ view model =
                 }
             ]
           <|
-            List.map (list model.theme) model.questList
+            List.map (list model.theme) quests
         ]
 
 

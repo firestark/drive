@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Api
 import Browser
-import Browser.Navigation
+import Browser.Navigation as Nav
 import Element exposing (Color, Element, fill, height, layout, width)
 import Element.Background as Background
 import Element.Font as Font
@@ -21,7 +21,7 @@ type Model
 
 
 type alias Data =
-    { key : Browser.Navigation.Key
+    { key : Nav.Key
     , url : Url
     , questPage : Page.Quest.List.Model
     }
@@ -39,20 +39,20 @@ type SubMsg
     | UrlChanged Url
 
 
-init : Maybe Viewer -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
+init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.light
+            Theme.dark
     in
     case maybeViewer of
-        Just _ ->
+        Just viewer ->
             ( Authenticated
                 { key = navKey
                 , url = url
-                , questPage = Tuple.first <| Page.Quest.List.init theme
+                , questPage = Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) theme
                 }
-            , Cmd.none
+            , Cmd.map (AuthenticatedMsg << GotQuestListMsg) (Tuple.second <| Page.Quest.List.init (Viewer.cred viewer) theme)
             )
 
         Nothing ->
@@ -85,11 +85,11 @@ update msg model =
 
                 Unauthenticated loginModel ->
                     case maybeViewer of
-                        Just _ ->
+                        Just viewer ->
                             ( Authenticated
                                 { key = loginModel.key
                                 , url = loginModel.url
-                                , questPage = Tuple.first <| Page.Quest.List.init loginModel.theme
+                                , questPage = Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) loginModel.theme
                                 }
                             , Cmd.none
                             )
@@ -104,10 +104,10 @@ updateAuthenticated msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( Authenticated model, Browser.Navigation.pushUrl model.key (Url.toString url) )
+                    ( Authenticated model, Nav.pushUrl model.key (Url.toString url) )
 
                 Browser.External href ->
-                    ( Authenticated model, Browser.Navigation.load href )
+                    ( Authenticated model, Nav.load href )
 
         GotQuestListMsg subMsg ->
             ( Authenticated { model | questPage = Tuple.first (Page.Quest.List.update subMsg model.questPage) }, Cmd.none )

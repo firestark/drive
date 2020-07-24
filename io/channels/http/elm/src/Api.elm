@@ -14,6 +14,7 @@ import Http exposing (Body)
 import Json.Decode as Decode exposing (Decoder, Value, decodeString, field, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
+import RemoteData exposing (WebData)
 import Url exposing (Url)
 import Username exposing (Username)
 
@@ -48,7 +49,7 @@ username (Cred val _) =
 
 credHeader : Cred -> Http.Header
 credHeader (Cred _ token) =
-    Http.header "authorization" ("Token " ++ token)
+    Http.header "authorization" token
 
 
 {-| It's important that this is never exposed!
@@ -157,7 +158,7 @@ storageDecoder viewerDecoder =
 -- HTTP
 
 
-get : Endpoint -> Maybe Cred -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
+get : Endpoint -> Maybe Cred -> (WebData a -> msg) -> Decoder a -> Cmd msg
 get url maybeCred msg decoder =
     Endpoint.request
         { method = "GET"
@@ -170,7 +171,7 @@ get url maybeCred msg decoder =
                     []
         , url = url
         , body = Http.emptyBody
-        , expect = Http.expectJson msg decoder
+        , expect = Http.expectJson (RemoteData.fromResult >> msg) decoder
         , timeout = Nothing
         , tracker = Nothing
         }

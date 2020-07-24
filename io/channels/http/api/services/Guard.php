@@ -40,6 +40,9 @@ class Guard
         if ($this->validate($token))
             return true;
 
+        if ($request->getMethod() === 'OPTIONS')
+            return true;
+
         if (in_array($request->getUri()->getPath(), $this->public[$request->getMethod()]))
             return true;
         

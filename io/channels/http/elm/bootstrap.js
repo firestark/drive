@@ -10822,8 +10822,41 @@ var $author$project$Viewer$decoder = A2(
 var $author$project$Main$Authenticated = function (a) {
 	return {$: 'Authenticated', a: a};
 };
+var $author$project$Main$GotQuestListMsg = function (a) {
+	return {$: 'GotQuestListMsg', a: a};
+};
 var $author$project$Main$Unauthenticated = function (a) {
 	return {$: 'Unauthenticated', a: a};
+};
+var $author$project$Viewer$cred = function (_v0) {
+	var val = _v0.b;
+	return val;
+};
+var $author$project$Theme$Dark = {$: 'Dark'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
+var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
+var $author$project$Material$Color$red500 = A3($mdgriffith$elm_ui$Element$rgb255, 244, 67, 54);
+var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
+var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$Theme$dark = {
+	background: A3($mdgriffith$elm_ui$Element$rgb255, 48, 48, 48),
+	error: $author$project$Material$Color$red500,
+	kind: $author$project$Theme$Dark,
+	onBackground: $author$project$Material$Color$white,
+	onPrimary: $author$project$Material$Color$white,
+	onSecondary: $author$project$Material$Color$black,
+	onSurface: $author$project$Material$Color$white,
+	primary: $author$project$Material$Color$deepPurple500,
+	secondary: $author$project$Material$Color$tealA400,
+	surface: A3($mdgriffith$elm_ui$Element$rgb255, 66, 66, 66)
 };
 var $author$project$Page$Login$Form = F2(
 	function (name, password) {
@@ -10842,322 +10875,44 @@ var $author$project$Page$Login$init = F3(
 		};
 	});
 var $author$project$Page$Quest$List$Closed = {$: 'Closed'};
+var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
+var $author$project$Page$Quest$List$GotQuests = function (a) {
+	return {$: 'GotQuests', a: a};
+};
 var $author$project$Quest$Quest = F5(
 	function (title, description, category, timeEstimate, moreInfo) {
 		return {category: category, description: description, moreInfo: moreInfo, timeEstimate: timeEstimate, title: title};
 	});
-var $author$project$Quest$mocks = _List_fromArray(
-	[
-		A5($author$project$Quest$Quest, 'PBR introduction', 'A short introduction to PBR', 'Texturing', '4 min', 'PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=7NjGETJMZvY&t=85s'),
-		A5($author$project$Quest$Quest, 'PBR basics', 'The basics of PBR usage is explained here', 'Texturing', '10 min', 'PBR is a new improved workflow for texturing. Get to know PBR with this tutorial: https://www.youtube.com/watch?v=_LaVvGlkBDs'),
-		A5($author$project$Quest$Quest, 'Game genres explained', 'Every game genre has it charms, learn about them here', 'Idea exploration', '5 - 10 min', 'Every game genre has it charms, learn about them here')
-	]);
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Page$Quest$List$isNotSameCategory = F2(
-	function (category, _v0) {
-		var itemCategory = _v0.a;
-		return !_Utils_eq(category, itemCategory);
-	});
-var $author$project$Page$Quest$List$isSameCategory = F2(
-	function (category, _v0) {
-		var itemCategory = _v0.a;
-		return _Utils_eq(category, itemCategory);
-	});
-var $author$project$Page$Quest$List$foldFunction = F2(
-	function (_v0, sortedItems) {
-		var category = _v0.a;
-		var quest = _v0.b;
-		var _v1 = $elm$core$List$head(
-			A2(
-				$elm$core$List$filter,
-				$author$project$Page$Quest$List$isSameCategory(category),
-				sortedItems));
-		if (_v1.$ === 'Nothing') {
-			return A2(
-				$elm$core$List$cons,
-				_Utils_Tuple2(
-					category,
-					_List_fromArray(
-						[quest])),
-				sortedItems);
-		} else {
-			var _v2 = _v1.a;
-			var itemCategory = _v2.a;
-			var questList = _v2.b;
-			return A2(
-				$elm$core$List$cons,
-				_Utils_Tuple2(
-					itemCategory,
-					A2($elm$core$List$cons, quest, questList)),
-				A2(
-					$elm$core$List$filter,
-					$author$project$Page$Quest$List$isNotSameCategory(category),
-					sortedItems));
-		}
-	});
-var $author$project$Page$Quest$List$toItem = function (quest) {
-	return _Utils_Tuple2(quest.category, quest);
-};
-var $author$project$Page$Quest$List$sort = function (quests) {
-	var duplicateItemList = A2($elm$core$List$map, $author$project$Page$Quest$List$toItem, quests);
-	return A3($elm$core$List$foldr, $author$project$Page$Quest$List$foldFunction, _List_Nil, duplicateItemList);
-};
-var $author$project$Page$Quest$List$init = function (theme) {
-	return _Utils_Tuple2(
-		{
-			dialog: $author$project$Page$Quest$List$Closed,
-			questList: $author$project$Page$Quest$List$sort($author$project$Quest$mocks),
-			searchText: '',
-			theme: theme
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Theme$Light = {$: 'Light'};
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
-var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
-var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
-var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
-var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
-var $author$project$Theme$light = {
-	background: $author$project$Material$Color$white,
-	error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
-	kind: $author$project$Theme$Light,
-	onBackground: $author$project$Material$Color$black,
-	onPrimary: $author$project$Material$Color$white,
-	onSecondary: $author$project$Material$Color$black,
-	onSurface: $author$project$Material$Color$black,
-	primary: $author$project$Material$Color$deepPurple500,
-	secondary: $author$project$Material$Color$tealA400,
-	surface: $author$project$Material$Color$white
-};
-var $author$project$Main$init = F3(
-	function (maybeViewer, url, navKey) {
-		var theme = $author$project$Theme$light;
-		if (maybeViewer.$ === 'Just') {
-			return _Utils_Tuple2(
-				$author$project$Main$Authenticated(
-					{
-						key: navKey,
-						questPage: $author$project$Page$Quest$List$init(theme).a,
-						url: url
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(
-				$author$project$Main$Unauthenticated(
-					A3($author$project$Page$Login$init, navKey, url, theme)),
-				$elm$core$Platform$Cmd$none);
-		}
-	});
-var $author$project$Main$ViewerChanged = function (a) {
-	return {$: 'ViewerChanged', a: a};
-};
-var $author$project$Api$decodeFromChange = F2(
-	function (viewerDecoder, val) {
-		return $elm$core$Result$toMaybe(
-			A2(
-				$elm$json$Json$Decode$decodeValue,
-				$author$project$Api$storageDecoder(viewerDecoder),
-				val));
-	});
-var $author$project$Api$onStoreChange = _Platform_incomingPort('onStoreChange', $elm$json$Json$Decode$value);
-var $author$project$Api$viewerChanges = F2(
-	function (toMsg, decoder) {
-		return $author$project$Api$onStoreChange(
-			function (value) {
-				return toMsg(
-					A2($author$project$Api$decodeFromChange, decoder, value));
-			});
-	});
-var $author$project$Main$subscriptions = function (_v0) {
-	return A2($author$project$Api$viewerChanges, $author$project$Main$ViewerChanged, $author$project$Viewer$decoder);
-};
-var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm$url$Url$addPort = F2(
-	function (maybePort, starter) {
-		if (maybePort.$ === 'Nothing') {
-			return starter;
-		} else {
-			var port_ = maybePort.a;
-			return starter + (':' + $elm$core$String$fromInt(port_));
-		}
-	});
-var $elm$url$Url$addPrefixed = F3(
-	function (prefix, maybeSegment, starter) {
-		if (maybeSegment.$ === 'Nothing') {
-			return starter;
-		} else {
-			var segment = maybeSegment.a;
-			return _Utils_ap(
-				starter,
-				_Utils_ap(prefix, segment));
-		}
-	});
-var $elm$url$Url$toString = function (url) {
-	var http = function () {
-		var _v0 = url.protocol;
-		if (_v0.$ === 'Http') {
-			return 'http://';
-		} else {
-			return 'https://';
-		}
-	}();
-	return A3(
-		$elm$url$Url$addPrefixed,
-		'#',
-		url.fragment,
+var $author$project$Quest$itemDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'moreInfo',
+	$elm$json$Json$Decode$string,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'timeEstimate',
+		$elm$json$Json$Decode$string,
 		A3(
-			$elm$url$Url$addPrefixed,
-			'?',
-			url.query,
-			_Utils_ap(
-				A2(
-					$elm$url$Url$addPort,
-					url.port_,
-					_Utils_ap(http, url.host)),
-				url.path)));
-};
-var $author$project$Page$Quest$List$Open = function (a) {
-	return {$: 'Open', a: a};
-};
-var $author$project$Page$Quest$List$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'CloseDialog':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{dialog: $author$project$Page$Quest$List$Closed}),
-					$elm$core$Platform$Cmd$none);
-			case 'OpenDialog':
-				var title = msg.a;
-				var moreInfo = msg.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dialog: $author$project$Page$Quest$List$Open(
-								{moreInfo: moreInfo, title: title})
-						}),
-					$elm$core$Platform$Cmd$none);
-			default:
-				var text = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{searchText: text}),
-					$elm$core$Platform$Cmd$none);
-		}
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'category',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'description',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'title',
+					$elm$json$Json$Decode$string,
+					$elm$json$Json$Decode$succeed($author$project$Quest$Quest))))));
+var $author$project$Quest$decoder = $elm$json$Json$Decode$list($author$project$Quest$itemDecoder);
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
 	});
-var $author$project$Main$updateAuthenticated = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'LinkClicked':
-				var urlRequest = msg.a;
-				if (urlRequest.$ === 'Internal') {
-					var url = urlRequest.a;
-					return _Utils_Tuple2(
-						$author$project$Main$Authenticated(model),
-						A2(
-							$elm$browser$Browser$Navigation$pushUrl,
-							model.key,
-							$elm$url$Url$toString(url)));
-				} else {
-					var href = urlRequest.a;
-					return _Utils_Tuple2(
-						$author$project$Main$Authenticated(model),
-						$elm$browser$Browser$Navigation$load(href));
-				}
-			case 'GotQuestListMsg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Authenticated(
-						_Utils_update(
-							model,
-							{
-								questPage: A2($author$project$Page$Quest$List$update, subMsg, model.questPage).a
-							})),
-					$elm$core$Platform$Cmd$none);
-			default:
-				var url = msg.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Authenticated(
-						_Utils_update(
-							model,
-							{url: url})),
-					$elm$core$Platform$Cmd$none);
-		}
-	});
-var $author$project$Main$UnauthenticatedMsg = function (a) {
-	return {$: 'UnauthenticatedMsg', a: a};
-};
-var $author$project$Page$Login$HideSnackbar = {$: 'HideSnackbar'};
-var $author$project$Page$Login$ServerError = function (a) {
-	return {$: 'ServerError', a: a};
-};
-var $author$project$Page$Login$ShowSnackbar = {$: 'ShowSnackbar'};
-var $author$project$Api$decodeErrors = function (error) {
-	switch (error.$) {
-		case 'BadBody':
-			var explanation = error.a;
-			return _List_fromArray(
-				['The server responded with something unexpected. Reason: ' + explanation]);
-		case 'BadUrl':
-			return _List_fromArray(
-				['Invalid url']);
-		case 'BadStatus':
-			var statusCode = error.a;
-			return _List_fromArray(
-				[
-					'Request failed with status code: ' + $elm$core$String$fromInt(statusCode)
-				]);
-		case 'NetworkError':
-			return _List_fromArray(
-				['Unable to reach server.']);
-		default:
-			return _List_fromArray(
-				['Server is taking too long to respond. Please try again later.']);
-	}
-};
-var $elm$core$Process$sleep = _Process_sleep;
-var $author$project$Page$Login$delay = F2(
-	function (time, msg) {
-		return A2(
-			$elm$core$Task$perform,
-			function (_v0) {
-				return msg;
-			},
-			$elm$core$Process$sleep(time));
-	});
-var $author$project$Page$Login$CompletedLogin = function (a) {
-	return {$: 'CompletedLogin', a: a};
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $author$project$Api$credHeader = function (_v0) {
+	var token = _v0.b;
+	return A2($elm$http$Http$header, 'authorization', token);
 };
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -11186,53 +10941,7 @@ var $elm$core$Maybe$isJust = function (maybe) {
 	}
 };
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
-var $author$project$Api$Endpoint$Endpoint = function (a) {
-	return {$: 'Endpoint', a: a};
-};
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$crossOrigin = F3(
-	function (prePath, pathSegments, parameters) {
-		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
-	});
-var $author$project$Api$Endpoint$url = F2(
-	function (paths, queryParams) {
-		return $author$project$Api$Endpoint$Endpoint(
-			A3($elm$url$Url$Builder$crossOrigin, 'http://localhost:8001', paths, queryParams));
-	});
-var $author$project$Api$Endpoint$login = A2(
-	$author$project$Api$Endpoint$url,
-	_List_fromArray(
-		['authenticate']),
-	_List_Nil);
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
-var $author$project$Api$credHeader = function (_v0) {
-	var token = _v0.b;
-	return A2($elm$http$Http$header, 'authorization', 'Token ' + token);
-};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$expectStringResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
@@ -11299,6 +11008,21 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
+var $krisajenkins$remotedata$RemoteData$Failure = function (a) {
+	return {$: 'Failure', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$Success = function (a) {
+	return {$: 'Success', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$fromResult = function (result) {
+	if (result.$ === 'Err') {
+		var e = result.a;
+		return $krisajenkins$remotedata$RemoteData$Failure(e);
+	} else {
+		var x = result.a;
+		return $krisajenkins$remotedata$RemoteData$Success(x);
+	}
+};
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -11465,6 +11189,309 @@ var $author$project$Api$Endpoint$request = function (config) {
 			url: $author$project$Api$Endpoint$unwrap(config.url)
 		});
 };
+var $author$project$Api$get = F4(
+	function (url, maybeCred, msg, decoder) {
+		return $author$project$Api$Endpoint$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, msg),
+					decoder),
+				headers: function () {
+					if (maybeCred.$ === 'Just') {
+						var cred = maybeCred.a;
+						return _List_fromArray(
+							[
+								$author$project$Api$credHeader(cred)
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}(),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: url
+			});
+	});
+var $author$project$Api$Endpoint$Endpoint = function (a) {
+	return {$: 'Endpoint', a: a};
+};
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$crossOrigin = F3(
+	function (prePath, pathSegments, parameters) {
+		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
+	});
+var $author$project$Api$Endpoint$url = F2(
+	function (paths, queryParams) {
+		return $author$project$Api$Endpoint$Endpoint(
+			A3($elm$url$Url$Builder$crossOrigin, 'http://localhost:8001', paths, queryParams));
+	});
+var $author$project$Api$Endpoint$quests = A2(
+	$author$project$Api$Endpoint$url,
+	_List_fromArray(
+		['']),
+	_List_Nil);
+var $author$project$Page$Quest$List$request = function (cred) {
+	return A4(
+		$author$project$Api$get,
+		$author$project$Api$Endpoint$quests,
+		$elm$core$Maybe$Just(cred),
+		$author$project$Page$Quest$List$GotQuests,
+		$author$project$Quest$decoder);
+};
+var $author$project$Page$Quest$List$init = F2(
+	function (cred, theme) {
+		return _Utils_Tuple2(
+			{dialog: $author$project$Page$Quest$List$Closed, questList: $krisajenkins$remotedata$RemoteData$NotAsked, searchText: '', theme: theme},
+			$author$project$Page$Quest$List$request(cred));
+	});
+var $author$project$Main$init = F3(
+	function (maybeViewer, url, navKey) {
+		var theme = $author$project$Theme$dark;
+		if (maybeViewer.$ === 'Just') {
+			var viewer = maybeViewer.a;
+			return _Utils_Tuple2(
+				$author$project$Main$Authenticated(
+					{
+						key: navKey,
+						questPage: A2(
+							$author$project$Page$Quest$List$init,
+							$author$project$Viewer$cred(viewer),
+							theme).a,
+						url: url
+					}),
+				A2(
+					$elm$core$Platform$Cmd$map,
+					A2($elm$core$Basics$composeL, $author$project$Main$AuthenticatedMsg, $author$project$Main$GotQuestListMsg),
+					A2(
+						$author$project$Page$Quest$List$init,
+						$author$project$Viewer$cred(viewer),
+						theme).b));
+		} else {
+			return _Utils_Tuple2(
+				$author$project$Main$Unauthenticated(
+					A3($author$project$Page$Login$init, navKey, url, theme)),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$ViewerChanged = function (a) {
+	return {$: 'ViewerChanged', a: a};
+};
+var $author$project$Api$decodeFromChange = F2(
+	function (viewerDecoder, val) {
+		return $elm$core$Result$toMaybe(
+			A2(
+				$elm$json$Json$Decode$decodeValue,
+				$author$project$Api$storageDecoder(viewerDecoder),
+				val));
+	});
+var $author$project$Api$onStoreChange = _Platform_incomingPort('onStoreChange', $elm$json$Json$Decode$value);
+var $author$project$Api$viewerChanges = F2(
+	function (toMsg, decoder) {
+		return $author$project$Api$onStoreChange(
+			function (value) {
+				return toMsg(
+					A2($author$project$Api$decodeFromChange, decoder, value));
+			});
+	});
+var $author$project$Main$subscriptions = function (_v0) {
+	return A2($author$project$Api$viewerChanges, $author$project$Main$ViewerChanged, $author$project$Viewer$decoder);
+};
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var $author$project$Page$Quest$List$Open = function (a) {
+	return {$: 'Open', a: a};
+};
+var $author$project$Page$Quest$List$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'CloseDialog':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{dialog: $author$project$Page$Quest$List$Closed}),
+					$elm$core$Platform$Cmd$none);
+			case 'GotQuests':
+				var response = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{questList: response}),
+					$elm$core$Platform$Cmd$none);
+			case 'OpenDialog':
+				var title = msg.a;
+				var moreInfo = msg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							dialog: $author$project$Page$Quest$List$Open(
+								{moreInfo: moreInfo, title: title})
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var text = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{searchText: text}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$updateAuthenticated = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'LinkClicked':
+				var urlRequest = msg.a;
+				if (urlRequest.$ === 'Internal') {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Authenticated(model),
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							model.key,
+							$elm$url$Url$toString(url)));
+				} else {
+					var href = urlRequest.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Authenticated(model),
+						$elm$browser$Browser$Navigation$load(href));
+				}
+			case 'GotQuestListMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Authenticated(
+						_Utils_update(
+							model,
+							{
+								questPage: A2($author$project$Page$Quest$List$update, subMsg, model.questPage).a
+							})),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var url = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Authenticated(
+						_Utils_update(
+							model,
+							{url: url})),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$UnauthenticatedMsg = function (a) {
+	return {$: 'UnauthenticatedMsg', a: a};
+};
+var $author$project$Page$Login$HideSnackbar = {$: 'HideSnackbar'};
+var $author$project$Page$Login$ServerError = function (a) {
+	return {$: 'ServerError', a: a};
+};
+var $author$project$Page$Login$ShowSnackbar = {$: 'ShowSnackbar'};
+var $author$project$Api$decodeErrors = function (error) {
+	switch (error.$) {
+		case 'BadBody':
+			var explanation = error.a;
+			return _List_fromArray(
+				['The server responded with something unexpected. Reason: ' + explanation]);
+		case 'BadUrl':
+			return _List_fromArray(
+				['Invalid url']);
+		case 'BadStatus':
+			var statusCode = error.a;
+			return _List_fromArray(
+				[
+					'Request failed with status code: ' + $elm$core$String$fromInt(statusCode)
+				]);
+		case 'NetworkError':
+			return _List_fromArray(
+				['Unable to reach server.']);
+		default:
+			return _List_fromArray(
+				['Server is taking too long to respond. Please try again later.']);
+	}
+};
+var $elm$core$Process$sleep = _Process_sleep;
+var $author$project$Page$Login$delay = F2(
+	function (time, msg) {
+		return A2(
+			$elm$core$Task$perform,
+			function (_v0) {
+				return msg;
+			},
+			$elm$core$Process$sleep(time));
+	});
+var $author$project$Page$Login$CompletedLogin = function (a) {
+	return {$: 'CompletedLogin', a: a};
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $author$project$Api$Endpoint$login = A2(
+	$author$project$Api$Endpoint$url,
+	_List_fromArray(
+		['authenticate']),
+	_List_Nil);
 var $author$project$Api$post = F5(
 	function (url, maybeCred, msg, body, decoder) {
 		return $author$project$Api$Endpoint$request(
@@ -11761,11 +11788,15 @@ var $author$project$Main$update = F2(
 				} else {
 					var loginModel = model.a;
 					if (maybeViewer.$ === 'Just') {
+						var viewer = maybeViewer.a;
 						return _Utils_Tuple2(
 							$author$project$Main$Authenticated(
 								{
 									key: loginModel.key,
-									questPage: $author$project$Page$Quest$List$init(loginModel.theme).a,
+									questPage: A2(
+										$author$project$Page$Quest$List$init,
+										$author$project$Viewer$cred(viewer),
+										loginModel.theme).a,
 									url: loginModel.url
 								}),
 							$elm$core$Platform$Cmd$none);
@@ -11775,9 +11806,6 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
-var $author$project$Main$GotQuestListMsg = function (a) {
-	return {$: 'GotQuestListMsg', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Internal$Model$Styled = function (a) {
 	return {$: 'Styled', a: a};
@@ -15086,6 +15114,17 @@ var $mdgriffith$elm_ui$Internal$Model$adjust = F3(
 	function (size, height, vertical) {
 		return {height: height / size, size: size, vertical: vertical};
 	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $elm$core$List$maximum = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -17628,6 +17667,15 @@ var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
 		return false;
 	}
 };
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $mdgriffith$elm_ui$Internal$Model$Label = function (a) {
 	return {$: 'Label', a: a};
 };
@@ -18715,6 +18763,55 @@ var $author$project$Page$Login$view = function (model) {
 				$author$project$Page$Login$loginButton(model.theme)
 			]));
 };
+var $author$project$Page$Quest$List$isNotSameCategory = F2(
+	function (category, _v0) {
+		var itemCategory = _v0.a;
+		return !_Utils_eq(category, itemCategory);
+	});
+var $author$project$Page$Quest$List$isSameCategory = F2(
+	function (category, _v0) {
+		var itemCategory = _v0.a;
+		return _Utils_eq(category, itemCategory);
+	});
+var $author$project$Page$Quest$List$foldFunction = F2(
+	function (_v0, sortedItems) {
+		var category = _v0.a;
+		var quest = _v0.b;
+		var _v1 = $elm$core$List$head(
+			A2(
+				$elm$core$List$filter,
+				$author$project$Page$Quest$List$isSameCategory(category),
+				sortedItems));
+		if (_v1.$ === 'Nothing') {
+			return A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(
+					category,
+					_List_fromArray(
+						[quest])),
+				sortedItems);
+		} else {
+			var _v2 = _v1.a;
+			var itemCategory = _v2.a;
+			var questList = _v2.b;
+			return A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(
+					itemCategory,
+					A2($elm$core$List$cons, quest, questList)),
+				A2(
+					$elm$core$List$filter,
+					$author$project$Page$Quest$List$isNotSameCategory(category),
+					sortedItems));
+		}
+	});
+var $author$project$Page$Quest$List$toItem = function (quest) {
+	return _Utils_Tuple2(quest.category, quest);
+};
+var $author$project$Page$Quest$List$sort = function (quests) {
+	var duplicateItemList = A2($elm$core$List$map, $author$project$Page$Quest$List$toItem, quests);
+	return A3($elm$core$List$foldr, $author$project$Page$Quest$List$foldFunction, _List_Nil, duplicateItemList);
+};
 var $author$project$Page$Quest$List$CloseDialog = {$: 'CloseDialog'};
 var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
 var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
@@ -19560,47 +19657,80 @@ var $author$project$Page$Quest$List$topAppBar = function (model) {
 					]))
 			]));
 };
+var $author$project$Page$Quest$List$viewQuests = F2(
+	function (model, quests) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$onRight(
+					$author$project$Page$Quest$List$fab(model.theme)),
+					$mdgriffith$elm_ui$Element$inFront(
+					function () {
+						var _v0 = model.dialog;
+						if (_v0.$ === 'Open') {
+							var title = _v0.a.title;
+							var moreInfo = _v0.a.moreInfo;
+							return A4($author$project$Material$Dialog$dialog, model.theme, $author$project$Page$Quest$List$CloseDialog, title, moreInfo);
+						} else {
+							return $mdgriffith$elm_ui$Element$none;
+						}
+					}())
+				]),
+			_List_fromArray(
+				[
+					$author$project$Page$Quest$List$topAppBar(model),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$maximum, 1200, $mdgriffith$elm_ui$Element$fill)),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$scrollbarY,
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 72, left: 0, right: 0, top: 0})
+						]),
+					A2(
+						$elm$core$List$map,
+						$author$project$Page$Quest$List$list(model.theme),
+						quests))
+				]));
+	});
 var $author$project$Page$Quest$List$view = function (model) {
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$onRight(
-				$author$project$Page$Quest$List$fab(model.theme)),
-				$mdgriffith$elm_ui$Element$inFront(
-				function () {
-					var _v0 = model.dialog;
-					if (_v0.$ === 'Open') {
-						var title = _v0.a.title;
-						var moreInfo = _v0.a.moreInfo;
-						return A4($author$project$Material$Dialog$dialog, model.theme, $author$project$Page$Quest$List$CloseDialog, title, moreInfo);
-					} else {
-						return $mdgriffith$elm_ui$Element$none;
-					}
-				}())
-			]),
-		_List_fromArray(
-			[
-				$author$project$Page$Quest$List$topAppBar(model),
-				A2(
-				$mdgriffith$elm_ui$Element$column,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width(
-						A2($mdgriffith$elm_ui$Element$maximum, 1200, $mdgriffith$elm_ui$Element$fill)),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$scrollbarY,
-						$mdgriffith$elm_ui$Element$paddingEach(
-						{bottom: 72, left: 0, right: 0, top: 0})
-					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$Page$Quest$List$list(model.theme),
-					model.questList))
-			]));
+	var _v0 = model.questList;
+	switch (_v0.$) {
+		case 'NotAsked':
+			return $mdgriffith$elm_ui$Element$text('You didnt ask me so i will do nothing');
+		case 'Loading':
+			return $mdgriffith$elm_ui$Element$text('Loading...');
+		case 'Success':
+			var quests = _v0.a;
+			return A2(
+				$author$project$Page$Quest$List$viewQuests,
+				model,
+				$author$project$Page$Quest$List$sort(quests));
+		default:
+			var error = _v0.a;
+			switch (error.$) {
+				case 'BadBody':
+					var explanation = error.a;
+					return $mdgriffith$elm_ui$Element$text('The server responded with something unexpected. Reason: ' + explanation);
+				case 'BadUrl':
+					return $mdgriffith$elm_ui$Element$text('Invalid url');
+				case 'BadStatus':
+					var statusCode = error.a;
+					return $mdgriffith$elm_ui$Element$text(
+						'Request failed with status code: ' + $elm$core$String$fromInt(statusCode));
+				case 'NetworkError':
+					return $mdgriffith$elm_ui$Element$text('Unable to reach server.');
+				default:
+					return $mdgriffith$elm_ui$Element$text('Server is taking too long to respond. Please try again later.');
+			}
+	}
 };
 var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
 	function (a, b) {
@@ -19929,4 +20059,4 @@ var $author$project$Main$main = A2(
 		update: $author$project$Main$update,
 		view: $author$project$Main$view
 	});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"AuthenticatedMsg":["Main.SubMsg"],"UnauthenticatedMsg":["Page.Login.Msg"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Main.SubMsg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"GotQuestListMsg":["Page.Quest.List.Msg"],"UrlChanged":["Url.Url"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"AuthenticatedMsg":["Main.SubMsg"],"UnauthenticatedMsg":["Page.Login.Msg"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Main.SubMsg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"GotQuestListMsg":["Page.Quest.List.Msg"],"UrlChanged":["Url.Url"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
