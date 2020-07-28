@@ -9,6 +9,7 @@ import Element.Font as Font
 import Html exposing (Html)
 import Json.Decode exposing (Value)
 import Page.Login
+import Page.Quest.Add
 import Page.Quest.List
 import Route exposing (Route)
 import Theme exposing (Theme)
@@ -33,7 +34,7 @@ type alias Session =
 
 
 type Page
-    = AddQuest
+    = AddQuest Page.Quest.Add.Model
     | QuestList Page.Quest.List.Model
 
 
@@ -58,7 +59,8 @@ init maybeViewer url navKey =
 
 
 type Msg
-    = GotLoginMsg Page.Login.Msg
+    = GotAddQuestMsg Page.Quest.Add.Msg
+    | GotLoginMsg Page.Login.Msg
     | GotQuestListMsg Page.Quest.List.Msg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
@@ -75,6 +77,13 @@ update msg model =
 
                 Browser.External href ->
                     ( Authenticated session page, Nav.load href )
+
+        ( Authenticated session (AddQuest page), GotAddQuestMsg subMsg ) ->
+            let
+                ( updatedModel, cmd ) =
+                    Page.Quest.Add.update subMsg page
+            in
+            ( Authenticated session (AddQuest updatedModel), Cmd.map GotAddQuestMsg cmd )
 
         ( Authenticated session (QuestList page), GotQuestListMsg subMsg ) ->
             let
@@ -121,7 +130,11 @@ changeRouteTo maybeRoute model =
                     ( model, Cmd.none )
 
                 Just Route.AddQuest ->
-                    ( Authenticated session AddQuest, Cmd.none )
+                    let
+                        subModel =
+                            Page.Quest.Add.init session.theme
+                    in
+                    ( Authenticated session (AddQuest subModel), Cmd.none )
 
                 Just Route.QuestList ->
                     let
@@ -155,16 +168,16 @@ view model =
             , body = [ wrapper loginModel.theme.background <| Element.map GotLoginMsg (Page.Login.view loginModel) ]
             }
 
-        Authenticated _ page ->
+        Authenticated session page ->
             case page of
-                AddQuest ->
+                AddQuest data ->
                     { title = "Add quest"
-                    , body = [ layout [] (Element.text "Yess the quest add page comes here.") ]
+                    , body = [ wrapper session.theme.background <| Element.map GotAddQuestMsg (Page.Quest.Add.view data) ]
                     }
 
                 QuestList data ->
                     { title = "My title"
-                    , body = [ wrapper data.theme.background <| Element.map GotQuestListMsg (Page.Quest.List.view data) ]
+                    , body = [ wrapper session.theme.background <| Element.map GotQuestListMsg (Page.Quest.List.view data) ]
                     }
 
 
