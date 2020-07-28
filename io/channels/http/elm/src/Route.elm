@@ -1,4 +1,4 @@
-module Route exposing (Route(..), fromUrl, href, replaceUrl, routeToString)
+module Route exposing (Route(..), fromUrl, href, replaceUrl, toString)
 
 import Browser.Navigation as Nav
 import Html exposing (Attribute)
@@ -12,9 +12,7 @@ import Url.Parser as Parser exposing (Parser, oneOf, s)
 
 
 type Route
-    = Login
-    | Logout
-    | Register
+    = AddQuest
     | QuestList
 
 
@@ -22,9 +20,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map QuestList Parser.top
-        , Parser.map Login (s "login")
-        , Parser.map Logout (s "logout")
-        , Parser.map Register (s "register")
+        , Parser.map AddQuest (s "add")
         ]
 
 
@@ -34,12 +30,12 @@ parser =
 
 href : Route -> Attribute msg
 href targetRoute =
-    Attr.href (routeToString targetRoute)
+    Attr.href (toString targetRoute)
 
 
 replaceUrl : Nav.Key -> Route -> Cmd msg
 replaceUrl key route =
-    Nav.replaceUrl key (routeToString route)
+    Nav.replaceUrl key (toString route)
 
 
 fromUrl : Url -> Maybe Route
@@ -55,22 +51,16 @@ fromUrl url =
 -- INTERNAL
 
 
-routeToString : Route -> String
-routeToString page =
+toString : Route -> String
+toString page =
     "/#/" ++ String.join "/" (routeToPieces page)
 
 
 routeToPieces : Route -> List String
 routeToPieces page =
     case page of
+        AddQuest ->
+            [ "add" ]
+
         QuestList ->
             []
-
-        Login ->
-            [ "login" ]
-
-        Logout ->
-            [ "logout" ]
-
-        Register ->
-            [ "register" ]

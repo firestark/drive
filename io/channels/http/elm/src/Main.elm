@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Api
+import Api exposing (Cred)
 import Browser
 import Browser.Navigation as Nav
 import Element exposing (Color, Element, fill, height, layout, width)
@@ -10,121 +10,132 @@ import Html exposing (Html)
 import Json.Decode exposing (Value)
 import Page.Login
 import Page.Quest.List
-import Theme
+import Route exposing (Route)
+import Theme exposing (Theme)
 import Url exposing (Url)
 import Viewer exposing (Viewer)
 
 
+
+-- MODEL
+
+
 type Model
-    = Authenticated Data
+    = Authenticated Session Page
     | Unauthenticated Page.Login.Model
 
 
-type alias Data =
-    { key : Nav.Key
-    , url : Url
-    , questPage : Page.Quest.List.Model
+type alias Session =
+    { cred : Cred
+    , key : Nav.Key
+    , theme : Theme
     }
 
 
-type Msg
-    = AuthenticatedMsg SubMsg
-    | UnauthenticatedMsg Page.Login.Msg
-    | ViewerChanged (Maybe Viewer)
-
-
-type SubMsg
-    = LinkClicked Browser.UrlRequest
-    | GotQuestListMsg Page.Quest.List.Msg
-    | UrlChanged Url
+type Page
+    = AddQuest
+    | QuestList Page.Quest.List.Model
 
 
 init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.dark
+            Theme.light
     in
     case maybeViewer of
         Just viewer ->
-            ( Authenticated
-                { key = navKey
-                , url = url
-                , questPage = Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) theme
-                }
-            , Cmd.map (AuthenticatedMsg << GotQuestListMsg) (Tuple.second <| Page.Quest.List.init (Viewer.cred viewer) theme)
-            )
+            changeRouteTo (Route.fromUrl url)
+                (Authenticated (Session (Viewer.cred viewer) navKey theme) (QuestList <| Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) theme))
 
         Nothing ->
-            ( Unauthenticated (Page.Login.init navKey url theme), Cmd.none )
+            changeRouteTo (Route.fromUrl url)
+                (Unauthenticated <| Page.Login.init navKey theme)
+
+
+
+-- UPDATE
+
+
+type Msg
+    = GotLoginMsg Page.Login.Msg
+    | GotQuestListMsg Page.Quest.List.Msg
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url
+    | ViewerChanged (Maybe Viewer)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        AuthenticatedMsg subMsg ->
-            case model of
-                Authenticated data ->
-                    updateAuthenticated subMsg data
-
-                Unauthenticated _ ->
-                    ( model, Cmd.none )
-
-        UnauthenticatedMsg loginMsg ->
-            case model of
-                Authenticated _ ->
-                    ( model, Cmd.none )
-
-                Unauthenticated loginModel ->
-                    updateUnauthenticated loginMsg loginModel
-
-        ViewerChanged maybeViewer ->
-            case model of
-                Authenticated _ ->
-                    ( model, Cmd.none )
-
-                Unauthenticated loginModel ->
-                    case maybeViewer of
-                        Just viewer ->
-                            ( Authenticated
-                                { key = loginModel.key
-                                , url = loginModel.url
-                                , questPage = Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) loginModel.theme
-                                }
-                            , Cmd.none
-                            )
-
-                        Nothing ->
-                            ( model, Cmd.none )
-
-
-updateAuthenticated : SubMsg -> Data -> ( Model, Cmd Msg )
-updateAuthenticated msg model =
-    case msg of
-        LinkClicked urlRequest ->
+    case ( model, msg ) of
+        ( Authenticated session page, LinkClicked urlRequest ) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( Authenticated model, Nav.pushUrl model.key (Url.toString url) )
+                    ( Authenticated session page, Nav.pushUrl session.key (Url.toString url) )
 
                 Browser.External href ->
-                    ( Authenticated model, Nav.load href )
+                    ( Authenticated session page, Nav.load href )
 
-        GotQuestListMsg subMsg ->
-            ( Authenticated { model | questPage = Tuple.first (Page.Quest.List.update subMsg model.questPage) }, Cmd.none )
+        ( Authenticated session (QuestList page), GotQuestListMsg subMsg ) ->
+            let
+                ( updatedModel, cmd ) =
+                    Page.Quest.List.update subMsg page
+            in
+            ( Authenticated session (QuestList updatedModel), Cmd.map GotQuestListMsg cmd )
 
-        UrlChanged url ->
-            ( Authenticated { model | url = url }
-            , Cmd.none
-            )
+        ( Unauthenticated loginModel, GotLoginMsg loginMsg ) ->
+            let
+                ( newLoginModel, cmd ) =
+                    Page.Login.update loginMsg loginModel
+            in
+            ( Unauthenticated newLoginModel, Cmd.map GotLoginMsg cmd )
+
+        ( Unauthenticated loginModel, ViewerChanged maybeViewer ) ->
+            case maybeViewer of
+                Just viewer ->
+                    ( Authenticated
+                        { cred = Viewer.cred viewer
+                        , key = loginModel.key
+                        , theme = loginModel.theme
+                        }
+                        (QuestList <| Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) loginModel.theme)
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        ( _, UrlChanged url ) ->
+            changeRouteTo (Route.fromUrl url) model
+
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
 
-updateUnauthenticated : Page.Login.Msg -> Page.Login.Model -> ( Model, Cmd Msg )
-updateUnauthenticated msg model =
-    let
-        ( newLoginPageModel, cmd ) =
-            Page.Login.update msg model
-    in
-    ( Unauthenticated newLoginPageModel, Cmd.map UnauthenticatedMsg cmd )
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
+    case model of
+        Authenticated session _ ->
+            case maybeRoute of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just Route.AddQuest ->
+                    ( Authenticated session AddQuest, Cmd.none )
+
+                Just Route.QuestList ->
+                    let
+                        ( subModel, cmd ) =
+                            Page.Quest.List.init session.cred session.theme
+                    in
+                    ( Authenticated session (QuestList subModel), Cmd.map GotQuestListMsg cmd )
+
+        Unauthenticated _ ->
+            ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
@@ -132,16 +143,8 @@ subscriptions _ =
     Api.viewerChanges ViewerChanged Viewer.decoder
 
 
-main : Program Value Model Msg
-main =
-    Api.application Viewer.decoder
-        { init = init
-        , onUrlChange = AuthenticatedMsg << UrlChanged
-        , onUrlRequest = AuthenticatedMsg << LinkClicked
-        , subscriptions = subscriptions
-        , update = update
-        , view = view
-        }
+
+-- VIEW
 
 
 view : Model -> Browser.Document Msg
@@ -149,13 +152,20 @@ view model =
     case model of
         Unauthenticated loginModel ->
             { title = "Login"
-            , body = [ wrapper loginModel.theme.background <| Element.map UnauthenticatedMsg (Page.Login.view loginModel) ]
+            , body = [ wrapper loginModel.theme.background <| Element.map GotLoginMsg (Page.Login.view loginModel) ]
             }
 
-        Authenticated data ->
-            { title = "My title"
-            , body = [ wrapper data.questPage.theme.background <| Element.map (AuthenticatedMsg << GotQuestListMsg) (Page.Quest.List.view data.questPage) ]
-            }
+        Authenticated _ page ->
+            case page of
+                AddQuest ->
+                    { title = "Add quest"
+                    , body = [ layout [] (Element.text "Yess the quest add page comes here.") ]
+                    }
+
+                QuestList data ->
+                    { title = "My title"
+                    , body = [ wrapper data.theme.background <| Element.map GotQuestListMsg (Page.Quest.List.view data) ]
+                    }
 
 
 wrapper : Color -> Element msg -> Html msg
@@ -172,3 +182,19 @@ wrapper background element =
             ]
         ]
         element
+
+
+
+-- APP
+
+
+main : Program Value Model Msg
+main =
+    Api.application Viewer.decoder
+        { init = init
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
+        , subscriptions = subscriptions
+        , update = update
+        , view = view
+        }

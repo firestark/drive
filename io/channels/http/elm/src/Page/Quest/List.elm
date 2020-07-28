@@ -1,4 +1,4 @@
-module Page.Quest.List exposing (Model, Msg, init, toTheme, update, view)
+module Page.Quest.List exposing (Model, Msg, init, update, view)
 
 import Api exposing (Cred)
 import Api.Endpoint as Endpoint
@@ -71,11 +71,6 @@ update msg model =
             ( { model | searchText = text }, Cmd.none )
 
 
-toTheme : Model -> Theme
-toTheme model =
-    model.theme
-
-
 sort : List Quest -> List ( String, List Quest )
 sort quests =
     let
@@ -83,6 +78,24 @@ sort quests =
             List.map toItem quests
     in
     List.foldr foldFunction [] duplicateItemList
+
+
+filter : String -> Quest -> Bool
+filter text quest =
+    if String.contains text quest.title then
+        True
+
+    else if String.contains text quest.description then
+        True
+
+    else if String.contains text quest.category then
+        True
+
+    else if String.contains text quest.timeEstimate then
+        True
+
+    else
+        String.contains text quest.moreInfo
 
 
 toItem : Quest -> ( String, Quest )
@@ -116,36 +129,6 @@ isNotSameCategory category ( itemCategory, _ ) =
 
 view : Model -> Element Msg
 view model =
-    case model.questList of
-        RemoteData.NotAsked ->
-            text "You didnt ask me so i will do nothing"
-
-        RemoteData.Loading ->
-            text "Loading..."
-
-        RemoteData.Success quests ->
-            viewQuests model (sort quests)
-
-        RemoteData.Failure error ->
-            case error of
-                Http.BadBody explanation ->
-                    text <| "The server responded with something unexpected. Reason: " ++ explanation
-
-                Http.BadUrl _ ->
-                    text "Invalid url"
-
-                Http.BadStatus statusCode ->
-                    text <| "Request failed with status code: " ++ String.fromInt statusCode
-
-                Http.NetworkError ->
-                    text "Unable to reach server."
-
-                Http.Timeout ->
-                    text "Server is taking too long to respond. Please try again later."
-
-
-viewQuests : Model -> List ( String, List Quest ) -> Element Msg
-viewQuests model quests =
     column
         [ width fill
         , height fill
@@ -172,8 +155,42 @@ viewQuests model quests =
                 }
             ]
           <|
-            List.map (list model.theme) quests
+            data model
         ]
+
+
+data : Model -> List (Element Msg)
+data model =
+    case model.questList of
+        RemoteData.NotAsked ->
+            [ text "You didnt ask me so i will do nothing" ]
+
+        RemoteData.Loading ->
+            [ text "Loading..." ]
+
+        RemoteData.Success quests ->
+            if String.isEmpty model.searchText then
+                List.map (list model.theme) (sort quests)
+
+            else
+                List.map (list model.theme) (sort <| List.filter (filter model.searchText) quests)
+
+        RemoteData.Failure error ->
+            case error of
+                Http.BadBody explanation ->
+                    [ text <| "The server responded with something unexpected. Reason: " ++ explanation ]
+
+                Http.BadUrl _ ->
+                    [ text "Invalid url" ]
+
+                Http.BadStatus statusCode ->
+                    [ text <| "Request failed with status code: " ++ String.fromInt statusCode ]
+
+                Http.NetworkError ->
+                    [ text "Unable to reach server." ]
+
+                Http.Timeout ->
+                    [ text "Server is taking too long to respond. Please try again later." ]
 
 
 topAppBar : Model -> Element Msg
@@ -375,6 +392,6 @@ fab : Theme -> Element msg
 fab theme =
     Element.link
         Fab.bottomRight
-        { url = Route.routeToString Route.QuestList
+        { url = Route.toString Route.AddQuest
         , label = Fab.regular theme Icons.add
         }

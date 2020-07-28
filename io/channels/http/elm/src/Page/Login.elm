@@ -15,7 +15,6 @@ import Material.Icons as Icons
 import Process
 import Task
 import Theme exposing (Theme)
-import Url exposing (Url)
 import Viewer exposing (Viewer)
 
 
@@ -26,7 +25,6 @@ type alias Model =
     , showPassword : Bool
     , showSnackbar : Bool
     , theme : Theme
-    , url : Url
     }
 
 
@@ -41,15 +39,14 @@ type alias Form =
     }
 
 
-init : Browser.Navigation.Key -> Url -> Theme -> Model
-init key url theme =
+init : Browser.Navigation.Key -> Theme -> Model
+init key theme =
     { form = Form "" ""
     , key = key
     , problems = []
     , showPassword = False
     , showSnackbar = False
     , theme = theme
-    , url = url
     }
 
 
@@ -79,11 +76,7 @@ update msg model =
 
         CompletedLogin (Ok viewer) ->
             ( model
-            , Cmd.batch
-                [ Viewer.store viewer
-
-                -- , Browser.Navigation.pushUrl model.key "http://localhost:8000/home"
-                ]
+            , Viewer.store viewer
             )
 
         EnteredName name ->
