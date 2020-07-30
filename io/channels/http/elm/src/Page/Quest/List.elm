@@ -13,9 +13,11 @@ import Material.Dialog exposing (dialog)
 import Material.Elevation as Elevation
 import Material.Fab as Fab
 import Material.Icons as Icons
+import Process
 import Quest exposing (Quest)
 import RemoteData exposing (WebData)
 import Route
+import Task
 import Theme exposing (Theme)
 
 
@@ -24,6 +26,7 @@ type alias Model =
     , searchText : String
     , questList : WebData (List Quest)
     , dialog : Dialog
+    , snackbar : Maybe String
     }
 
 
@@ -35,19 +38,27 @@ type Dialog
 type Msg
     = CloseDialog
     | GotQuests (WebData (List Quest))
+    | HideSnackbar
     | OpenDialog String String
     | UpdateSearch String
 
 
-init : Cred -> Theme -> ( Model, Cmd Msg )
-init cred theme =
+init : Maybe String -> Cred -> Theme -> ( Model, Cmd Msg )
+init snackbarTxt cred theme =
     ( { theme = theme
       , searchText = ""
       , questList = RemoteData.NotAsked
       , dialog = Closed
+      , snackbar = snackbarTxt
       }
-    , request cred
+    , Cmd.batch [ request cred, delay 5000 HideSnackbar ]
     )
+
+
+delay : Float -> msg -> Cmd msg
+delay time msg =
+    Process.sleep time
+        |> Task.perform (\_ -> msg)
 
 
 request : Cred -> Cmd Msg
@@ -63,6 +74,9 @@ update msg model =
 
         GotQuests response ->
             ( { model | questList = response }, Cmd.none )
+
+        HideSnackbar ->
+            ( { model | snackbar = Nothing }, Cmd.none )
 
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
@@ -140,6 +154,13 @@ view model =
 
                 Closed ->
                     Element.none
+        , Element.inFront <|
+            case model.snackbar of
+                Just txt ->
+                    snackbar txt
+
+                Nothing ->
+                    Element.none
         ]
         [ topAppBar model
         , column
@@ -156,6 +177,28 @@ view model =
             ]
           <|
             data model
+        ]
+
+
+snackbar : String -> Element msg
+snackbar txt =
+    column
+        [ Element.alignBottom
+        , width fill
+        , paddingXY 8 8
+        ]
+        [ row
+            [ width fill
+            , height (px 48)
+            , Elevation.z5
+            , Background.color (rgba255 51 51 51 1)
+            , Font.color (rgba255 255 240 240 1)
+            , Font.semiBold
+            , Font.size 14
+            , Border.rounded 4
+            , paddingXY 14 16
+            ]
+            [ text txt ]
         ]
 
 

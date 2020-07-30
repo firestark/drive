@@ -29,6 +29,7 @@ type Model
 type alias Session =
     { cred : Cred
     , key : Nav.Key
+    , snackbar : Maybe String
     , theme : Theme
     }
 
@@ -48,7 +49,7 @@ init maybeViewer url navKey =
     case maybeViewer of
         Just viewer ->
             changeRouteTo (Route.fromUrl url)
-                (Authenticated (Session (Viewer.cred viewer) navKey theme) Redirect)
+                (Authenticated (Session (Viewer.cred viewer) navKey Nothing theme) Redirect)
 
         Nothing ->
             changeRouteTo (Route.fromUrl url)
@@ -86,7 +87,7 @@ update msg model =
                         ( updatedModel, cmd ) =
                             Page.Quest.Add.update subMsg page
                     in
-                    ( Authenticated session (AddQuest updatedModel), Cmd.batch [ Nav.pushUrl session.key "/", Cmd.map GotAddQuestMsg cmd ] )
+                    ( Authenticated { session | snackbar = Just "Quest added." } (AddQuest updatedModel), Cmd.batch [ Cmd.map GotAddQuestMsg cmd, Nav.pushUrl session.key "/" ] )
 
                 _ ->
                     let
@@ -118,6 +119,7 @@ update msg model =
                         Authenticated
                             { cred = Viewer.cred viewer
                             , key = loginModel.key
+                            , snackbar = Nothing
                             , theme = loginModel.theme
                             }
                             Redirect
@@ -150,7 +152,7 @@ changeRouteTo maybeRoute model =
                 Just Route.QuestList ->
                     let
                         ( subModel, cmd ) =
-                            Page.Quest.List.init session.cred session.theme
+                            Page.Quest.List.init session.snackbar session.cred session.theme
                     in
                     ( Authenticated session (QuestList subModel), Cmd.map GotQuestListMsg cmd )
 

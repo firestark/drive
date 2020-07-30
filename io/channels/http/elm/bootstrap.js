@@ -10838,9 +10838,9 @@ var $author$project$Main$Authenticated = F2(
 		return {$: 'Authenticated', a: a, b: b};
 	});
 var $author$project$Main$Redirect = {$: 'Redirect'};
-var $author$project$Main$Session = F3(
-	function (cred, key, theme) {
-		return {cred: cred, key: key, theme: theme};
+var $author$project$Main$Session = F4(
+	function (cred, key, snackbar, theme) {
+		return {cred: cred, key: key, snackbar: snackbar, theme: theme};
 	});
 var $author$project$Main$Unauthenticated = function (a) {
 	return {$: 'Unauthenticated', a: a};
@@ -10860,7 +10860,18 @@ var $author$project$Page$Quest$Add$init = F2(
 		return {cred: cred, form: $author$project$Page$Quest$Add$emptyForm, problems: _List_Nil, theme: theme};
 	});
 var $author$project$Page$Quest$List$Closed = {$: 'Closed'};
+var $author$project$Page$Quest$List$HideSnackbar = {$: 'HideSnackbar'};
 var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
+var $elm$core$Process$sleep = _Process_sleep;
+var $author$project$Page$Quest$List$delay = F2(
+	function (time, msg) {
+		return A2(
+			$elm$core$Task$perform,
+			function (_v0) {
+				return msg;
+			},
+			$elm$core$Process$sleep(time));
+	});
 var $author$project$Page$Quest$List$GotQuests = function (a) {
 	return {$: 'GotQuests', a: a};
 };
@@ -11240,11 +11251,16 @@ var $author$project$Page$Quest$List$request = function (cred) {
 		$author$project$Page$Quest$List$GotQuests,
 		$author$project$Quest$decoder);
 };
-var $author$project$Page$Quest$List$init = F2(
-	function (cred, theme) {
+var $author$project$Page$Quest$List$init = F3(
+	function (snackbarTxt, cred, theme) {
 		return _Utils_Tuple2(
-			{dialog: $author$project$Page$Quest$List$Closed, questList: $krisajenkins$remotedata$RemoteData$NotAsked, searchText: '', theme: theme},
-			$author$project$Page$Quest$List$request(cred));
+			{dialog: $author$project$Page$Quest$List$Closed, questList: $krisajenkins$remotedata$RemoteData$NotAsked, searchText: '', snackbar: snackbarTxt, theme: theme},
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Page$Quest$List$request(cred),
+						A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$HideSnackbar)
+					])));
 	});
 var $author$project$Main$changeRouteTo = F2(
 	function (maybeRoute, model) {
@@ -11264,7 +11280,7 @@ var $author$project$Main$changeRouteTo = F2(
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var _v3 = maybeRoute.a;
-					var _v4 = A2($author$project$Page$Quest$List$init, session.cred, session.theme);
+					var _v4 = A3($author$project$Page$Quest$List$init, session.snackbar, session.cred, session.theme);
 					var subModel = _v4.a;
 					var cmd = _v4.b;
 					return _Utils_Tuple2(
@@ -11553,10 +11569,11 @@ var $author$project$Main$init = F3(
 				$author$project$Route$fromUrl(url),
 				A2(
 					$author$project$Main$Authenticated,
-					A3(
+					A4(
 						$author$project$Main$Session,
 						$author$project$Viewer$cred(viewer),
 						navKey,
+						$elm$core$Maybe$Nothing,
 						theme),
 					$author$project$Main$Redirect));
 		} else {
@@ -11670,7 +11687,6 @@ var $author$project$Api$decodeErrors = function (error) {
 				['Server is taking too long to respond. Please try again later.']);
 	}
 };
-var $elm$core$Process$sleep = _Process_sleep;
 var $author$project$Page$Login$delay = F2(
 	function (time, msg) {
 		return A2(
@@ -12204,6 +12220,12 @@ var $author$project$Page$Quest$List$update = F2(
 						model,
 						{questList: response}),
 					$elm$core$Platform$Cmd$none);
+			case 'HideSnackbar':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{snackbar: $elm$core$Maybe$Nothing}),
+					$elm$core$Platform$Cmd$none);
 			case 'OpenDialog':
 				var title = msg.a;
 				var moreInfo = msg.b;
@@ -12266,13 +12288,17 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(
 								A2(
 									$author$project$Main$Authenticated,
-									session,
+									_Utils_update(
+										session,
+										{
+											snackbar: $elm$core$Maybe$Just('Quest added.')
+										}),
 									$author$project$Main$AddQuest(updatedModel)),
 								$elm$core$Platform$Cmd$batch(
 									_List_fromArray(
 										[
-											A2($elm$browser$Browser$Navigation$pushUrl, session.key, '/'),
-											A2($elm$core$Platform$Cmd$map, $author$project$Main$GotAddQuestMsg, cmd)
+											A2($elm$core$Platform$Cmd$map, $author$project$Main$GotAddQuestMsg, cmd),
+											A2($elm$browser$Browser$Navigation$pushUrl, session.key, '/')
 										])));
 						} else {
 							var _v6 = A2($author$project$Page$Quest$Add$update, subMsg, page);
@@ -12333,6 +12359,7 @@ var $author$project$Main$update = F2(
 									{
 										cred: $author$project$Viewer$cred(viewer),
 										key: loginModel.key,
+										snackbar: $elm$core$Maybe$Nothing,
 										theme: loginModel.theme
 									},
 									$author$project$Main$Redirect));
@@ -20654,6 +20681,40 @@ var $author$project$Page$Quest$List$fab = function (theme) {
 			url: $author$project$Route$toString($author$project$Route$AddQuest)
 		});
 };
+var $author$project$Page$Quest$List$snackbar = function (txt) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alignBottom,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				A2($mdgriffith$elm_ui$Element$paddingXY, 8, 8)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(48)),
+						$author$project$Material$Elevation$z5,
+						$mdgriffith$elm_ui$Element$Background$color(
+						A4($mdgriffith$elm_ui$Element$rgba255, 51, 51, 51, 1)),
+						$mdgriffith$elm_ui$Element$Font$color(
+						A4($mdgriffith$elm_ui$Element$rgba255, 255, 240, 240, 1)),
+						$mdgriffith$elm_ui$Element$Font$semiBold,
+						$mdgriffith$elm_ui$Element$Font$size(14),
+						$mdgriffith$elm_ui$Element$Border$rounded(4),
+						A2($mdgriffith$elm_ui$Element$paddingXY, 14, 16)
+					]),
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$text(txt)
+					]))
+			]));
+};
 var $author$project$Page$Quest$List$UpdateSearch = function (a) {
 	return {$: 'UpdateSearch', a: a};
 };
@@ -20827,6 +20888,16 @@ var $author$project$Page$Quest$List$view = function (model) {
 						var title = _v0.a.title;
 						var moreInfo = _v0.a.moreInfo;
 						return A4($author$project$Material$Dialog$dialog, model.theme, $author$project$Page$Quest$List$CloseDialog, title, moreInfo);
+					} else {
+						return $mdgriffith$elm_ui$Element$none;
+					}
+				}()),
+				$mdgriffith$elm_ui$Element$inFront(
+				function () {
+					var _v1 = model.snackbar;
+					if (_v1.$ === 'Just') {
+						var txt = _v1.a;
+						return $author$project$Page$Quest$List$snackbar(txt);
 					} else {
 						return $mdgriffith$elm_ui$Element$none;
 					}
@@ -21192,4 +21263,4 @@ var $author$project$Main$main = A2(
 	$author$project$Api$application,
 	$author$project$Viewer$decoder,
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"HideSnackbar":[],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
