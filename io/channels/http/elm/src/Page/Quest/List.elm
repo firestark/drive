@@ -242,13 +242,13 @@ input model =
         , Input.text
             [ Font.size 16
             , Font.light
-            , Font.color (rgba255 0 0 0 0.38)
+            , Font.color (rgba255 0 0 0 0.87)
             , Border.width 0
             , Background.color (rgba255 0 0 0 0)
             ]
             { onChange = UpdateSearch
             , text = model.searchText
-            , placeholder = Just <| placeholder [] (text "Search quests")
+            , placeholder = Just <| placeholder [ Font.color <| rgba255 0 0 0 0.38 ] (text "Search quests")
             , label = Input.labelHidden ""
             }
         , Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.account_circle
@@ -261,7 +261,10 @@ input model =
 
 list : Theme -> ( String, List Quest ) -> Element Msg
 list theme ( category, quests ) =
-    column [ width fill ]
+    column
+        [ width fill
+        , paddingXY 0 8
+        ]
         [ listDividerTitle theme category
         , threeLine theme quests
         ]

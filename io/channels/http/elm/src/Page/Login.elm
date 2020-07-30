@@ -161,13 +161,13 @@ inputName model =
             , Input.text
                 [ Font.size 16
                 , Font.light
-                , Font.color <| Theme.highlight model.theme.kind 0.38
+                , Font.color <| Theme.highlight model.theme.kind 0.87
                 , Border.width 0
                 , Background.color (rgba255 0 0 0 0)
                 ]
                 { onChange = EnteredName
                 , text = model.form.name
-                , placeholder = Just <| Input.placeholder [] (text "Name*")
+                , placeholder = Just <| Input.placeholder [ Font.color <| Theme.highlight model.theme.kind 0.38 ] (text "Name*")
                 , label = Input.labelHidden ""
                 }
             ]
@@ -191,13 +191,13 @@ inputPassword model =
             , Input.newPassword
                 [ Font.size 16
                 , Font.light
-                , Font.color <| Theme.highlight model.theme.kind 0.38
+                , Font.color <| Theme.highlight model.theme.kind 0.87
                 , Border.width 0
                 , Background.color (rgba255 0 0 0 0)
                 ]
                 { onChange = EnteredPassword
                 , text = model.form.password
-                , placeholder = Just <| Input.placeholder [] (text "Password*")
+                , placeholder = Just <| Input.placeholder [ Font.color <| Theme.highlight model.theme.kind 0.38 ] (text "Password*")
                 , label = Input.labelHidden ""
                 , show = model.showPassword
                 }
@@ -329,7 +329,7 @@ validateField (Trimmed form) field =
 
             Password ->
                 if String.isEmpty form.password then
-                    [ "password can't be blank." ]
+                    [ "Password can't be blank." ]
 
                 else
                     []

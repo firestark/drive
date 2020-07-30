@@ -1,4 +1,4 @@
-module Quest exposing (Quest, decoder)
+module Quest exposing (Quest, decoder, itemDecoder)
 
 import Json.Decode as Decode exposing (Decoder, string, succeed)
 import Json.Decode.Pipeline exposing (required)

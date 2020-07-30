@@ -1,8 +1,8 @@
 module Material.Dialog exposing (dialog)
 
-import Element exposing (Element, centerX, centerY, column, el, fill, height, paddingXY, paragraph, px, rgb255, row, text, width)
+import Element exposing (Color, Element, centerX, centerY, column, el, fill, fromRgb, height, mouseOver, paddingXY, paragraph, px, rgb255, row, text, toRgb, width)
 import Element.Background as Background
-import Element.Events exposing (onClick)
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Material.Elevation as Elevation
@@ -15,7 +15,6 @@ dialog theme msg title body =
         [ width fill
         , height fill
         , Background.color (Theme.highlight theme.kind 0.38)
-        , onClick msg
         , Element.inFront <|
             column
                 [ width (px 330)
@@ -44,27 +43,47 @@ dialog theme msg title body =
                         [ text body
                         ]
                     ]
-                , buttons theme
+                , buttons msg theme
                 ]
         ]
         []
 
 
-buttons : Theme -> Element msg
-buttons theme =
+buttons : msg -> Theme -> Element msg
+buttons msg theme =
     row
         [ height (px 52)
         , Element.alignBottom
         , width fill
+        , paddingXY 8 0
         ]
         [ Input.button
-            [ Font.color theme.primary
+            [ height (px 36)
+            , Font.color theme.primary
             , Font.size 14
             , Font.bold
             , Element.alignRight
-            , paddingXY 16 0
+            , paddingXY 8 0
+            , mouseOver
+                [ Background.color <| opaque theme.primary 0.04
+                ]
+            , Border.rounded 4
             ]
-            { onPress = Nothing
+            { onPress = Just msg
             , label = text "UNDERSTOOD"
             }
         ]
+
+
+opaque : Color -> Float -> Color
+opaque color alpha =
+    let
+        extracted =
+            toRgb color
+    in
+    fromRgb
+        { red = extracted.red
+        , green = extracted.green
+        , blue = extracted.blue
+        , alpha = alpha
+        }

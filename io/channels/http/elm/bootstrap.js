@@ -10837,9 +10837,7 @@ var $author$project$Main$Authenticated = F2(
 	function (a, b) {
 		return {$: 'Authenticated', a: a, b: b};
 	});
-var $author$project$Main$QuestList = function (a) {
-	return {$: 'QuestList', a: a};
-};
+var $author$project$Main$Redirect = {$: 'Redirect'};
 var $author$project$Main$Session = F3(
 	function (cred, key, theme) {
 		return {cred: cred, key: key, theme: theme};
@@ -10853,13 +10851,14 @@ var $author$project$Main$AddQuest = function (a) {
 var $author$project$Main$GotQuestListMsg = function (a) {
 	return {$: 'GotQuestListMsg', a: a};
 };
-var $author$project$Page$Quest$Add$init = function (theme) {
-	return {
-		form: {category: '', description: '', moreInfo: '', title: ''},
-		problems: _List_Nil,
-		theme: theme
-	};
+var $author$project$Main$QuestList = function (a) {
+	return {$: 'QuestList', a: a};
 };
+var $author$project$Page$Quest$Add$emptyForm = {category: '', description: '', moreInfo: '', timeEstimate: '', title: ''};
+var $author$project$Page$Quest$Add$init = F2(
+	function (cred, theme) {
+		return {cred: cred, form: $author$project$Page$Quest$Add$emptyForm, problems: _List_Nil, theme: theme};
+	});
 var $author$project$Page$Quest$List$Closed = {$: 'Closed'};
 var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
 var $author$project$Page$Quest$List$GotQuests = function (a) {
@@ -11256,7 +11255,7 @@ var $author$project$Main$changeRouteTo = F2(
 			} else {
 				if (maybeRoute.a.$ === 'AddQuest') {
 					var _v2 = maybeRoute.a;
-					var subModel = $author$project$Page$Quest$Add$init(session.theme);
+					var subModel = A2($author$project$Page$Quest$Add$init, session.cred, session.theme);
 					return _Utils_Tuple2(
 						A2(
 							$author$project$Main$Authenticated,
@@ -11283,6 +11282,32 @@ var $author$project$Main$changeRouteTo = F2(
 var $author$project$Viewer$cred = function (_v0) {
 	var val = _v0.b;
 	return val;
+};
+var $author$project$Theme$Dark = {$: 'Dark'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
+var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
+var $author$project$Material$Color$red500 = A3($mdgriffith$elm_ui$Element$rgb255, 244, 67, 54);
+var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
+var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$Theme$dark = {
+	background: A3($mdgriffith$elm_ui$Element$rgb255, 48, 48, 48),
+	error: $author$project$Material$Color$red500,
+	kind: $author$project$Theme$Dark,
+	onBackground: $author$project$Material$Color$white,
+	onPrimary: $author$project$Material$Color$white,
+	onSecondary: $author$project$Material$Color$black,
+	onSurface: $author$project$Material$Color$white,
+	primary: $author$project$Material$Color$deepPurple500,
+	secondary: $author$project$Material$Color$tealA400,
+	surface: A3($mdgriffith$elm_ui$Element$rgb255, 66, 66, 66)
 };
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
@@ -11518,34 +11543,9 @@ var $author$project$Page$Login$init = F2(
 			theme: theme
 		};
 	});
-var $author$project$Theme$Light = {$: 'Light'};
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
-var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
-var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
-var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
-var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
-var $author$project$Theme$light = {
-	background: $author$project$Material$Color$white,
-	error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
-	kind: $author$project$Theme$Light,
-	onBackground: $author$project$Material$Color$black,
-	onPrimary: $author$project$Material$Color$white,
-	onSecondary: $author$project$Material$Color$black,
-	onSurface: $author$project$Material$Color$black,
-	primary: $author$project$Material$Color$deepPurple500,
-	secondary: $author$project$Material$Color$tealA400,
-	surface: $author$project$Material$Color$white
-};
 var $author$project$Main$init = F3(
 	function (maybeViewer, url, navKey) {
-		var theme = $author$project$Theme$light;
+		var theme = $author$project$Theme$dark;
 		if (maybeViewer.$ === 'Just') {
 			var viewer = maybeViewer.a;
 			return A2(
@@ -11558,11 +11558,7 @@ var $author$project$Main$init = F3(
 						$author$project$Viewer$cred(viewer),
 						navKey,
 						theme),
-					$author$project$Main$QuestList(
-						A2(
-							$author$project$Page$Quest$List$init,
-							$author$project$Viewer$cred(viewer),
-							theme).a)));
+					$author$project$Main$Redirect));
 		} else {
 			return A2(
 				$author$project$Main$changeRouteTo,
@@ -11852,7 +11848,7 @@ var $author$project$Page$Login$validateField = F2(
 						['Name can\'t be blank.']) : _List_Nil;
 				} else {
 					return $elm$core$String$isEmpty(form.password) ? _List_fromArray(
-						['password can\'t be blank.']) : _List_Nil;
+						['Password can\'t be blank.']) : _List_Nil;
 				}
 			}());
 	});
@@ -11955,6 +11951,44 @@ var $author$project$Page$Login$update = F2(
 			}
 		}
 	});
+var $author$project$Page$Quest$Add$AddedQuest = function (a) {
+	return {$: 'AddedQuest', a: a};
+};
+var $author$project$Api$Endpoint$addQuest = A2(
+	$author$project$Api$Endpoint$url,
+	_List_fromArray(
+		['']),
+	_List_Nil);
+var $author$project$Page$Quest$Add$submit = F2(
+	function (cred, _v0) {
+		var form = _v0.a;
+		var quest = $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'title',
+					$elm$json$Json$Encode$string(form.title)),
+					_Utils_Tuple2(
+					'description',
+					$elm$json$Json$Encode$string(form.description)),
+					_Utils_Tuple2(
+					'category',
+					$elm$json$Json$Encode$string(form.category)),
+					_Utils_Tuple2(
+					'time estimate',
+					$elm$json$Json$Encode$string(form.timeEstimate)),
+					_Utils_Tuple2(
+					'moreInfo',
+					$elm$json$Json$Encode$string(form.moreInfo))
+				]));
+		return A5(
+			$author$project$Api$post,
+			$author$project$Api$Endpoint$addQuest,
+			$elm$core$Maybe$Just(cred),
+			$author$project$Page$Quest$Add$AddedQuest,
+			$elm$http$Http$jsonBody(quest),
+			$author$project$Quest$itemDecoder);
+	});
 var $author$project$Page$Quest$Add$updateForm = F2(
 	function (transform, model) {
 		return _Utils_Tuple2(
@@ -11965,9 +11999,87 @@ var $author$project$Page$Quest$Add$updateForm = F2(
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
+var $author$project$Page$Quest$Add$Category = {$: 'Category'};
+var $author$project$Page$Quest$Add$Description = {$: 'Description'};
+var $author$project$Page$Quest$Add$TimeEstimate = {$: 'TimeEstimate'};
+var $author$project$Page$Quest$Add$Title = {$: 'Title'};
+var $author$project$Page$Quest$Add$fieldsToValidate = _List_fromArray(
+	[$author$project$Page$Quest$Add$Title, $author$project$Page$Quest$Add$Description, $author$project$Page$Quest$Add$Category, $author$project$Page$Quest$Add$TimeEstimate]);
+var $author$project$Page$Quest$Add$Trimmed = function (a) {
+	return {$: 'Trimmed', a: a};
+};
+var $author$project$Page$Quest$Add$trimFields = function (_v0) {
+	var title = _v0.title;
+	var description = _v0.description;
+	var category = _v0.category;
+	var timeEstimate = _v0.timeEstimate;
+	var moreInfo = _v0.moreInfo;
+	return $author$project$Page$Quest$Add$Trimmed(
+		{
+			category: $elm$core$String$trim(category),
+			description: $elm$core$String$trim(description),
+			moreInfo: $elm$core$String$trim(moreInfo),
+			timeEstimate: $elm$core$String$trim(timeEstimate),
+			title: $elm$core$String$trim(title)
+		});
+};
+var $author$project$Page$Quest$Add$InvalidEntry = F2(
+	function (a, b) {
+		return {$: 'InvalidEntry', a: a, b: b};
+	});
+var $author$project$Page$Quest$Add$validateField = F2(
+	function (_v0, field) {
+		var form = _v0.a;
+		return A2(
+			$elm$core$List$map,
+			$author$project$Page$Quest$Add$InvalidEntry(field),
+			function () {
+				switch (field.$) {
+					case 'Title':
+						return $elm$core$String$isEmpty(form.title) ? _List_fromArray(
+							['Title can\'t be blank.']) : _List_Nil;
+					case 'Description':
+						return $elm$core$String$isEmpty(form.description) ? _List_fromArray(
+							['Description can\'t be blank.']) : _List_Nil;
+					case 'Category':
+						return $elm$core$String$isEmpty(form.category) ? _List_fromArray(
+							['Category can\'t be blank.']) : _List_Nil;
+					case 'TimeEstimate':
+						return $elm$core$String$isEmpty(form.timeEstimate) ? _List_fromArray(
+							['Time estimate can\'t be blank.']) : _List_Nil;
+					default:
+						return _List_Nil;
+				}
+			}());
+	});
+var $author$project$Page$Quest$Add$validate = function (form) {
+	var trimmedForm = $author$project$Page$Quest$Add$trimFields(form);
+	var _v0 = A2(
+		$elm$core$List$concatMap,
+		$author$project$Page$Quest$Add$validateField(trimmedForm),
+		$author$project$Page$Quest$Add$fieldsToValidate);
+	if (!_v0.b) {
+		return $elm$core$Result$Ok(trimmedForm);
+	} else {
+		var problems = _v0;
+		return $elm$core$Result$Err(problems);
+	}
+};
 var $author$project$Page$Quest$Add$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
+			case 'AddedQuest':
+				if (msg.a.$ === 'Err') {
+					var error = msg.a.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var quest = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{form: $author$project$Page$Quest$Add$emptyForm}),
+						$elm$core$Platform$Cmd$none);
+				}
 			case 'EnteredTitle':
 				var title = msg.a;
 				return A2(
@@ -11998,7 +12110,17 @@ var $author$project$Page$Quest$Add$update = F2(
 							{category: category});
 					},
 					model);
-			default:
+			case 'EnteredTimeEstimate':
+				var timeEstimate = msg.a;
+				return A2(
+					$author$project$Page$Quest$Add$updateForm,
+					function (form) {
+						return _Utils_update(
+							form,
+							{timeEstimate: timeEstimate});
+					},
+					model);
+			case 'EnteredMoreInfo':
 				var moreInfo = msg.a;
 				return A2(
 					$author$project$Page$Quest$Add$updateForm,
@@ -12008,6 +12130,23 @@ var $author$project$Page$Quest$Add$update = F2(
 							{moreInfo: moreInfo});
 					},
 					model);
+			default:
+				var _v1 = $author$project$Page$Quest$Add$validate(model.form);
+				if (_v1.$ === 'Ok') {
+					var validForm = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{problems: _List_Nil}),
+						A2($author$project$Page$Quest$Add$submit, model.cred, validForm));
+				} else {
+					var problems = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{problems: problems}),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Page$Quest$List$Open = function (a) {
@@ -12133,7 +12272,9 @@ var $author$project$Main$update = F2(
 						var maybeViewer = _v0.b.a;
 						if (maybeViewer.$ === 'Just') {
 							var viewer = maybeViewer.a;
-							return _Utils_Tuple2(
+							return A2(
+								$author$project$Main$changeRouteTo,
+								$elm$core$Maybe$Just($author$project$Route$QuestList),
 								A2(
 									$author$project$Main$Authenticated,
 									{
@@ -12141,12 +12282,7 @@ var $author$project$Main$update = F2(
 										key: loginModel.key,
 										theme: loginModel.theme
 									},
-									$author$project$Main$QuestList(
-										A2(
-											$author$project$Page$Quest$List$init,
-											$author$project$Viewer$cred(viewer),
-											loginModel.theme).a)),
-								$elm$core$Platform$Cmd$none);
+									$author$project$Main$Redirect));
 						} else {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
@@ -18780,7 +18916,7 @@ var $author$project$Page$Login$inputName = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -18791,7 +18927,11 @@ var $author$project$Page$Login$inputName = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
 									$mdgriffith$elm_ui$Element$text('Name*'))),
 							text: model.form.name
 						})
@@ -18910,7 +19050,7 @@ var $author$project$Page$Login$inputPassword = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -18921,7 +19061,11 @@ var $author$project$Page$Login$inputPassword = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
 									$mdgriffith$elm_ui$Element$text('Password*'))),
 							show: model.showPassword,
 							text: model.form.password
@@ -19122,7 +19266,18 @@ var $author$project$Page$Login$view = function (model) {
 };
 var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
 var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
-var $author$project$Material$Icons$add = $mdgriffith$elm_ui$Element$html(
+var $author$project$Page$Quest$Add$SubmittedForm = {$: 'SubmittedForm'};
+var $author$project$Material$Fab$bottomRight = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$htmlAttribute(
+		A2($elm$html$Html$Attributes$style, 'position', 'fixed')),
+		$mdgriffith$elm_ui$Element$htmlAttribute(
+		A2($elm$html$Html$Attributes$style, 'bottom', '16px')),
+		$mdgriffith$elm_ui$Element$htmlAttribute(
+		A2($elm$html$Html$Attributes$style, 'right', '16px')),
+		$mdgriffith$elm_ui$Element$pointer
+	]);
+var $author$project$Material$Icons$check = $mdgriffith$elm_ui$Element$html(
 	A2(
 		$elm$svg$Svg$svg,
 		_List_fromArray(
@@ -19138,58 +19293,18 @@ var $author$project$Material$Icons$add = $mdgriffith$elm_ui$Element$html(
 				$elm$svg$Svg$path,
 				_List_fromArray(
 					[
-						$elm$svg$Svg$Attributes$d('M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z')
+						$elm$svg$Svg$Attributes$d('M0 0h24v24H0z'),
+						$elm$svg$Svg$Attributes$fill('none')
 					]),
 				_List_Nil),
 				A2(
 				$elm$svg$Svg$path,
 				_List_fromArray(
 					[
-						$elm$svg$Svg$Attributes$d('M0 0h24v24H0z'),
-						$elm$svg$Svg$Attributes$fill('none')
+						$elm$svg$Svg$Attributes$d('M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z')
 					]),
 				_List_Nil)
 			])));
-var $author$project$Material$Fab$bottomRight = _List_fromArray(
-	[
-		$mdgriffith$elm_ui$Element$htmlAttribute(
-		A2($elm$html$Html$Attributes$style, 'position', 'fixed')),
-		$mdgriffith$elm_ui$Element$htmlAttribute(
-		A2($elm$html$Html$Attributes$style, 'bottom', '16px')),
-		$mdgriffith$elm_ui$Element$htmlAttribute(
-		A2($elm$html$Html$Attributes$style, 'right', '16px'))
-	]);
-var $elm$html$Html$Attributes$rel = _VirtualDom_attribute('rel');
-var $mdgriffith$elm_ui$Element$link = F2(
-	function (attrs, _v0) {
-		var url = _v0.url;
-		var label = _v0.label;
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$NodeName('a'),
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Attr(
-					$elm$html$Html$Attributes$href(url)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$Attr(
-						$elm$html$Html$Attributes$rel('noopener noreferrer')),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.link)))),
-								attrs))))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[label])));
-	});
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
 var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
@@ -19329,30 +19444,18 @@ var $author$project$Material$Fab$regular = F2(
 					[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
 				icon));
 	});
-var $author$project$Route$routeToPieces = function (page) {
-	if (page.$ === 'AddQuest') {
-		return _List_fromArray(
-			['add']);
-	} else {
-		return _List_Nil;
-	}
-};
-var $author$project$Route$toString = function (page) {
-	return '/#/' + A2(
-		$elm$core$String$join,
-		'/',
-		$author$project$Route$routeToPieces(page));
-};
 var $author$project$Page$Quest$Add$fab = function (theme) {
 	return A2(
-		$mdgriffith$elm_ui$Element$link,
-		$author$project$Material$Fab$bottomRight,
-		{
-			label: A2($author$project$Material$Fab$regular, theme, $author$project$Material$Icons$add),
-			url: $author$project$Route$toString($author$project$Route$AddQuest)
-		});
+		$mdgriffith$elm_ui$Element$el,
+		A2(
+			$elm$core$List$append,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$Quest$Add$SubmittedForm)
+				]),
+			$author$project$Material$Fab$bottomRight),
+		A2($author$project$Material$Fab$regular, theme, $author$project$Material$Icons$check));
 };
-var $author$project$Page$Quest$Add$Category = {$: 'Category'};
 var $author$project$Page$Quest$Add$EnteredCategory = function (a) {
 	return {$: 'EnteredCategory', a: a};
 };
@@ -19425,7 +19528,7 @@ var $author$project$Page$Quest$Add$inputCategory = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -19436,7 +19539,11 @@ var $author$project$Page$Quest$Add$inputCategory = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
 									$mdgriffith$elm_ui$Element$text('Category*'))),
 							text: model.form.category
 						})
@@ -19444,7 +19551,6 @@ var $author$project$Page$Quest$Add$inputCategory = function (model) {
 				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$Category, model.problems)
 			]));
 };
-var $author$project$Page$Quest$Add$Description = {$: 'Description'};
 var $author$project$Page$Quest$Add$EnteredDescription = function (a) {
 	return {$: 'EnteredDescription', a: a};
 };
@@ -19480,7 +19586,7 @@ var $author$project$Page$Quest$Add$inputDescription = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -19491,7 +19597,11 @@ var $author$project$Page$Quest$Add$inputDescription = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
 									$mdgriffith$elm_ui$Element$text('Description*'))),
 							text: model.form.description
 						})
@@ -19543,7 +19653,7 @@ var $author$project$Page$Quest$Add$inputMoreInfo = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0)),
@@ -19555,8 +19665,12 @@ var $author$project$Page$Quest$Add$inputMoreInfo = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
-									$mdgriffith$elm_ui$Element$text('More info*'))),
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
+									$mdgriffith$elm_ui$Element$text('More info'))),
 							spellcheck: true,
 							text: model.form.moreInfo
 						})
@@ -19564,10 +19678,67 @@ var $author$project$Page$Quest$Add$inputMoreInfo = function (model) {
 				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$MoreInfo, model.problems)
 			]));
 };
+var $author$project$Page$Quest$Add$EnteredTimeEstimate = function (a) {
+	return {$: 'EnteredTimeEstimate', a: a};
+};
+var $author$project$Page$Quest$Add$inputTimeEstimate = function (model) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(56)),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Border$rounded(4),
+						$mdgriffith$elm_ui$Element$Border$width(0),
+						$mdgriffith$elm_ui$Element$Background$color(
+						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.07)),
+						A2($mdgriffith$elm_ui$Element$paddingXY, 16, 0),
+						$mdgriffith$elm_ui$Element$spacing(16)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$Input$text,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$size(16),
+								$mdgriffith$elm_ui$Element$Font$light,
+								$mdgriffith$elm_ui$Element$Font$color(
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
+								$mdgriffith$elm_ui$Element$Border$width(0),
+								$mdgriffith$elm_ui$Element$Background$color(
+								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
+							]),
+						{
+							label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
+							onChange: $author$project$Page$Quest$Add$EnteredTimeEstimate,
+							placeholder: $elm$core$Maybe$Just(
+								A2(
+									$mdgriffith$elm_ui$Element$Input$placeholder,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
+									$mdgriffith$elm_ui$Element$text('Time estimate*'))),
+							text: model.form.timeEstimate
+						})
+					])),
+				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$TimeEstimate, model.problems)
+			]));
+};
 var $author$project$Page$Quest$Add$EnteredTitle = function (a) {
 	return {$: 'EnteredTitle', a: a};
 };
-var $author$project$Page$Quest$Add$Title = {$: 'Title'};
 var $author$project$Page$Quest$Add$inputTitle = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
@@ -19600,7 +19771,7 @@ var $author$project$Page$Quest$Add$inputTitle = function (model) {
 								$mdgriffith$elm_ui$Element$Font$size(16),
 								$mdgriffith$elm_ui$Element$Font$light,
 								$mdgriffith$elm_ui$Element$Font$color(
-								A2($author$project$Theme$highlight, model.theme.kind, 0.38)),
+								A2($author$project$Theme$highlight, model.theme.kind, 0.87)),
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -19611,7 +19782,11 @@ var $author$project$Page$Quest$Add$inputTitle = function (model) {
 							placeholder: $elm$core$Maybe$Just(
 								A2(
 									$mdgriffith$elm_ui$Element$Input$placeholder,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$color(
+											A2($author$project$Theme$highlight, model.theme.kind, 0.38))
+										]),
 									$mdgriffith$elm_ui$Element$text('Title*'))),
 							text: model.form.title
 						})
@@ -19659,6 +19834,51 @@ var $author$project$Material$Icons$arrow_back = $mdgriffith$elm_ui$Element$html(
 					]),
 				_List_Nil)
 			])));
+var $elm$html$Html$Attributes$rel = _VirtualDom_attribute('rel');
+var $mdgriffith$elm_ui$Element$link = F2(
+	function (attrs, _v0) {
+		var url = _v0.url;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$NodeName('a'),
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Attr(
+					$elm$html$Html$Attributes$href(url)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+						$elm$html$Html$Attributes$rel('noopener noreferrer')),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.link)))),
+								attrs))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $author$project$Route$routeToPieces = function (page) {
+	if (page.$ === 'AddQuest') {
+		return _List_fromArray(
+			['add']);
+	} else {
+		return _List_Nil;
+	}
+};
+var $author$project$Route$toString = function (page) {
+	return '/#/' + A2(
+		$elm$core$String$join,
+		'/',
+		$author$project$Route$routeToPieces(page));
+};
 var $author$project$Page$Quest$Add$topAppBarRow = F3(
 	function (theme, attributes, elements) {
 		return A2(
@@ -19704,7 +19924,13 @@ var $author$project$Page$Quest$Add$topAppBar = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A2($mdgriffith$elm_ui$Element$el, _List_Nil, $author$project$Material$Icons$arrow_back),
+								A2(
+								$mdgriffith$elm_ui$Element$link,
+								_List_Nil,
+								{
+									label: $author$project$Material$Icons$arrow_back,
+									url: $author$project$Route$toString($author$project$Route$QuestList)
+								}),
 								$mdgriffith$elm_ui$Element$text('New quest')
 							]))
 					]))
@@ -19741,6 +19967,7 @@ var $author$project$Page$Quest$Add$view = function (model) {
 						$author$project$Page$Quest$Add$inputTitle(model),
 						$author$project$Page$Quest$Add$inputDescription(model),
 						$author$project$Page$Quest$Add$inputCategory(model),
+						$author$project$Page$Quest$Add$inputTimeEstimate(model),
 						$author$project$Page$Quest$Add$inputMoreInfo(model)
 					]))
 			]));
@@ -19778,34 +20005,6 @@ var $author$project$Page$Quest$List$OpenDialog = F2(
 	});
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
-var $author$project$Material$Icons$check = $mdgriffith$elm_ui$Element$html(
-	A2(
-		$elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$height('24'),
-				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
-				$elm$svg$Svg$Attributes$width('24'),
-				$elm$svg$Svg$Attributes$fill('currentColor')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$svg$Svg$path,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$d('M0 0h24v24H0z'),
-						$elm$svg$Svg$Attributes$fill('none')
-					]),
-				_List_Nil),
-				A2(
-				$elm$svg$Svg$path,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$d('M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z')
-					]),
-				_List_Nil)
-			])));
 var $author$project$Page$Quest$List$icon = F3(
 	function (theme, attrs, icon_) {
 		return A2(
@@ -20069,7 +20268,8 @@ var $author$project$Page$Quest$List$list = F2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2($mdgriffith$elm_ui$Element$paddingXY, 0, 8)
 				]),
 			_List_fromArray(
 				[
@@ -20186,34 +20386,61 @@ var $author$project$Page$Quest$List$data = function (model) {
 			}
 	}
 };
-var $author$project$Material$Dialog$buttons = function (theme) {
-	return A2(
-		$mdgriffith$elm_ui$Element$row,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$height(
-				$mdgriffith$elm_ui$Element$px(52)),
-				$mdgriffith$elm_ui$Element$alignBottom,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$mdgriffith$elm_ui$Element$Input$button,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Font$color(theme.primary),
-						$mdgriffith$elm_ui$Element$Font$size(14),
-						$mdgriffith$elm_ui$Element$Font$bold,
-						$mdgriffith$elm_ui$Element$alignRight,
-						A2($mdgriffith$elm_ui$Element$paddingXY, 16, 0)
-					]),
-				{
-					label: $mdgriffith$elm_ui$Element$text('UNDERSTOOD'),
-					onPress: $elm$core$Maybe$Nothing
-				})
-			]));
+var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
+	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
 };
+var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	return {alpha: a, blue: b, green: g, red: r};
+};
+var $author$project$Material$Dialog$opaque = F2(
+	function (color, alpha) {
+		var extracted = $mdgriffith$elm_ui$Element$toRgb(color);
+		return $mdgriffith$elm_ui$Element$fromRgb(
+			{alpha: alpha, blue: extracted.blue, green: extracted.green, red: extracted.red});
+	});
+var $author$project$Material$Dialog$buttons = F2(
+	function (msg, theme) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(52)),
+					$mdgriffith$elm_ui$Element$alignBottom,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(36)),
+							$mdgriffith$elm_ui$Element$Font$color(theme.primary),
+							$mdgriffith$elm_ui$Element$Font$size(14),
+							$mdgriffith$elm_ui$Element$Font$bold,
+							$mdgriffith$elm_ui$Element$alignRight,
+							A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0),
+							$mdgriffith$elm_ui$Element$mouseOver(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Background$color(
+									A2($author$project$Material$Dialog$opaque, theme.primary, 0.04))
+								])),
+							$mdgriffith$elm_ui$Element$Border$rounded(4)
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$text('UNDERSTOOD'),
+						onPress: $elm$core$Maybe$Just(msg)
+					})
+				]));
+	});
 var $mdgriffith$elm_ui$Element$Background$image = function (src) {
 	return $mdgriffith$elm_ui$Internal$Model$Attr(
 		A2($elm$virtual_dom$VirtualDom$style, 'background', 'url(\"' + (src + '\") center / cover no-repeat')));
@@ -20230,7 +20457,6 @@ var $author$project$Material$Dialog$dialog = F4(
 					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$Background$color(
 					A2($author$project$Theme$highlight, theme.kind, 0.38)),
-					$mdgriffith$elm_ui$Element$Events$onClick(msg),
 					$mdgriffith$elm_ui$Element$inFront(
 					A2(
 						$mdgriffith$elm_ui$Element$column,
@@ -20291,11 +20517,39 @@ var $author$project$Material$Dialog$dialog = F4(
 												$mdgriffith$elm_ui$Element$text(body)
 											]))
 									])),
-								$author$project$Material$Dialog$buttons(theme)
+								A2($author$project$Material$Dialog$buttons, msg, theme)
 							])))
 				]),
 			_List_Nil);
 	});
+var $author$project$Material$Icons$add = $mdgriffith$elm_ui$Element$html(
+	A2(
+		$elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$height('24'),
+				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
+				$elm$svg$Svg$Attributes$width('24'),
+				$elm$svg$Svg$Attributes$fill('currentColor')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$path,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$d('M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z')
+					]),
+				_List_Nil),
+				A2(
+				$elm$svg$Svg$path,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$d('M0 0h24v24H0z'),
+						$elm$svg$Svg$Attributes$fill('none')
+					]),
+				_List_Nil)
+			])));
 var $author$project$Page$Quest$List$fab = function (theme) {
 	return A2(
 		$mdgriffith$elm_ui$Element$link,
@@ -20368,7 +20622,7 @@ var $author$project$Page$Quest$List$input = function (model) {
 						$mdgriffith$elm_ui$Element$Font$size(16),
 						$mdgriffith$elm_ui$Element$Font$light,
 						$mdgriffith$elm_ui$Element$Font$color(
-						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.38)),
+						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.87)),
 						$mdgriffith$elm_ui$Element$Border$width(0),
 						$mdgriffith$elm_ui$Element$Background$color(
 						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0))
@@ -20379,7 +20633,11 @@ var $author$project$Page$Quest$List$input = function (model) {
 					placeholder: $elm$core$Maybe$Just(
 						A2(
 							$mdgriffith$elm_ui$Element$Input$placeholder,
-							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$color(
+									A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.38))
+								]),
 							$mdgriffith$elm_ui$Element$text('Search quests'))),
 					text: model.searchText
 				}),
@@ -20799,36 +21057,39 @@ var $author$project$Main$view = function (model) {
 	} else {
 		var session = model.a;
 		var page = model.b;
-		if (page.$ === 'AddQuest') {
-			var data = page.a;
-			return {
-				body: _List_fromArray(
-					[
-						A2(
-						$author$project$Main$wrapper,
-						session.theme.background,
-						A2(
-							$mdgriffith$elm_ui$Element$map,
-							$author$project$Main$GotAddQuestMsg,
-							$author$project$Page$Quest$Add$view(data)))
-					]),
-				title: 'Add quest'
-			};
-		} else {
-			var data = page.a;
-			return {
-				body: _List_fromArray(
-					[
-						A2(
-						$author$project$Main$wrapper,
-						session.theme.background,
-						A2(
-							$mdgriffith$elm_ui$Element$map,
-							$author$project$Main$GotQuestListMsg,
-							$author$project$Page$Quest$List$view(data)))
-					]),
-				title: 'My title'
-			};
+		switch (page.$) {
+			case 'AddQuest':
+				var data = page.a;
+				return {
+					body: _List_fromArray(
+						[
+							A2(
+							$author$project$Main$wrapper,
+							session.theme.background,
+							A2(
+								$mdgriffith$elm_ui$Element$map,
+								$author$project$Main$GotAddQuestMsg,
+								$author$project$Page$Quest$Add$view(data)))
+						]),
+					title: 'Add quest'
+				};
+			case 'Redirect':
+				return {body: _List_Nil, title: 'Redirecting...'};
+			default:
+				var data = page.a;
+				return {
+					body: _List_fromArray(
+						[
+							A2(
+							$author$project$Main$wrapper,
+							session.theme.background,
+							A2(
+								$mdgriffith$elm_ui$Element$map,
+								$author$project$Main$GotQuestListMsg,
+								$author$project$Page$Quest$List$view(data)))
+						]),
+					title: 'My title'
+				};
 		}
 	}
 };
@@ -20836,4 +21097,4 @@ var $author$project$Main$main = A2(
 	$author$project$Api$application,
 	$author$project$Viewer$decoder,
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredMoreInfo":["String.String"]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));

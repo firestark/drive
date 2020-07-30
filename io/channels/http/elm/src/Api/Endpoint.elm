@@ -1,4 +1,4 @@
-module Api.Endpoint exposing (Endpoint, login, quests, request, user, users)
+module Api.Endpoint exposing (Endpoint, addQuest, login, quests, request, user, users)
 
 import Http
 import Url.Builder exposing (QueryParameter)
@@ -77,4 +77,9 @@ users =
 
 quests : Endpoint
 quests =
+    url [ "" ] []
+
+
+addQuest : Endpoint
+addQuest =
     url [ "" ] []

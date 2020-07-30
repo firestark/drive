@@ -35,6 +35,7 @@ type alias Session =
 
 type Page
     = AddQuest Page.Quest.Add.Model
+    | Redirect
     | QuestList Page.Quest.List.Model
 
 
@@ -42,12 +43,12 @@ init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.light
+            Theme.dark
     in
     case maybeViewer of
         Just viewer ->
             changeRouteTo (Route.fromUrl url)
-                (Authenticated (Session (Viewer.cred viewer) navKey theme) (QuestList <| Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) theme))
+                (Authenticated (Session (Viewer.cred viewer) navKey theme) Redirect)
 
         Nothing ->
             changeRouteTo (Route.fromUrl url)
@@ -102,14 +103,15 @@ update msg model =
         ( Unauthenticated loginModel, ViewerChanged maybeViewer ) ->
             case maybeViewer of
                 Just viewer ->
-                    ( Authenticated
-                        { cred = Viewer.cred viewer
-                        , key = loginModel.key
-                        , theme = loginModel.theme
-                        }
-                        (QuestList <| Tuple.first <| Page.Quest.List.init (Viewer.cred viewer) loginModel.theme)
-                    , Cmd.none
-                    )
+                    changeRouteTo
+                        (Just Route.QuestList)
+                    <|
+                        Authenticated
+                            { cred = Viewer.cred viewer
+                            , key = loginModel.key
+                            , theme = loginModel.theme
+                            }
+                            Redirect
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -132,7 +134,7 @@ changeRouteTo maybeRoute model =
                 Just Route.AddQuest ->
                     let
                         subModel =
-                            Page.Quest.Add.init session.theme
+                            Page.Quest.Add.init session.cred session.theme
                     in
                     ( Authenticated session (AddQuest subModel), Cmd.none )
 
@@ -173,6 +175,11 @@ view model =
                 AddQuest data ->
                     { title = "Add quest"
                     , body = [ wrapper session.theme.background <| Element.map GotAddQuestMsg (Page.Quest.Add.view data) ]
+                    }
+
+                Redirect ->
+                    { title = "Redirecting..."
+                    , body = []
                     }
 
                 QuestList data ->
