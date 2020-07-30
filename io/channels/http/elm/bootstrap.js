@@ -11951,6 +11951,17 @@ var $author$project$Page$Login$update = F2(
 			}
 		}
 	});
+var $author$project$Page$Quest$Add$InvalidEntry = F2(
+	function (a, b) {
+		return {$: 'InvalidEntry', a: a, b: b};
+	});
+var $author$project$Page$Quest$Add$ServerError = function (a) {
+	return {$: 'ServerError', a: a};
+};
+var $author$project$Page$Quest$Add$Title = {$: 'Title'};
+var $author$project$Page$Quest$Add$maxCategoryLength = 80;
+var $author$project$Page$Quest$Add$maxDescriptionLength = 80;
+var $author$project$Page$Quest$Add$maxMoreInfoLength = 255;
 var $author$project$Page$Quest$Add$AddedQuest = function (a) {
 	return {$: 'AddedQuest', a: a};
 };
@@ -12002,7 +12013,6 @@ var $author$project$Page$Quest$Add$updateForm = F2(
 var $author$project$Page$Quest$Add$Category = {$: 'Category'};
 var $author$project$Page$Quest$Add$Description = {$: 'Description'};
 var $author$project$Page$Quest$Add$TimeEstimate = {$: 'TimeEstimate'};
-var $author$project$Page$Quest$Add$Title = {$: 'Title'};
 var $author$project$Page$Quest$Add$fieldsToValidate = _List_fromArray(
 	[$author$project$Page$Quest$Add$Title, $author$project$Page$Quest$Add$Description, $author$project$Page$Quest$Add$Category, $author$project$Page$Quest$Add$TimeEstimate]);
 var $author$project$Page$Quest$Add$Trimmed = function (a) {
@@ -12023,10 +12033,6 @@ var $author$project$Page$Quest$Add$trimFields = function (_v0) {
 			title: $elm$core$String$trim(title)
 		});
 };
-var $author$project$Page$Quest$Add$InvalidEntry = F2(
-	function (a, b) {
-		return {$: 'InvalidEntry', a: a, b: b};
-	});
 var $author$project$Page$Quest$Add$validateField = F2(
 	function (_v0, field) {
 		var form = _v0.a;
@@ -12052,8 +12058,8 @@ var $author$project$Page$Quest$Add$validateField = F2(
 				}
 			}());
 	});
-var $author$project$Page$Quest$Add$validate = function (form) {
-	var trimmedForm = $author$project$Page$Quest$Add$trimFields(form);
+var $author$project$Page$Quest$Add$validate = function (model) {
+	var trimmedForm = $author$project$Page$Quest$Add$trimFields(model.form);
 	var _v0 = A2(
 		$elm$core$List$concatMap,
 		$author$project$Page$Quest$Add$validateField(trimmedForm),
@@ -12071,9 +12077,33 @@ var $author$project$Page$Quest$Add$update = F2(
 			case 'AddedQuest':
 				if (msg.a.$ === 'Err') {
 					var error = msg.a.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					if ((error.$ === 'BadStatus') && (error.a === 409)) {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									problems: A2(
+										$elm$core$List$append,
+										model.problems,
+										_List_fromArray(
+											[
+												A2($author$project$Page$Quest$Add$InvalidEntry, $author$project$Page$Quest$Add$Title, 'Title already exists.')
+											]))
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var serverErrors = A2(
+							$elm$core$List$map,
+							$author$project$Page$Quest$Add$ServerError,
+							$author$project$Api$decodeErrors(error));
+						var newModel = _Utils_update(
+							model,
+							{
+								problems: A2($elm$core$List$append, model.problems, serverErrors)
+							});
+						return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
+					}
 				} else {
-					var quest = msg.a.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -12092,7 +12122,9 @@ var $author$project$Page$Quest$Add$update = F2(
 					model);
 			case 'EnteredDescription':
 				var description = msg.a;
-				return A2(
+				return (_Utils_cmp(
+					$elm$core$String$length(description),
+					$author$project$Page$Quest$Add$maxDescriptionLength) > 0) ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : A2(
 					$author$project$Page$Quest$Add$updateForm,
 					function (form) {
 						return _Utils_update(
@@ -12102,7 +12134,9 @@ var $author$project$Page$Quest$Add$update = F2(
 					model);
 			case 'EnteredCategory':
 				var category = msg.a;
-				return A2(
+				return (_Utils_cmp(
+					$elm$core$String$length(category),
+					$author$project$Page$Quest$Add$maxCategoryLength) > 0) ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : A2(
 					$author$project$Page$Quest$Add$updateForm,
 					function (form) {
 						return _Utils_update(
@@ -12122,7 +12156,9 @@ var $author$project$Page$Quest$Add$update = F2(
 					model);
 			case 'EnteredMoreInfo':
 				var moreInfo = msg.a;
-				return A2(
+				return (_Utils_cmp(
+					$elm$core$String$length(moreInfo),
+					$author$project$Page$Quest$Add$maxMoreInfoLength) > 0) ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : A2(
 					$author$project$Page$Quest$Add$updateForm,
 					function (form) {
 						return _Utils_update(
@@ -12131,16 +12167,16 @@ var $author$project$Page$Quest$Add$update = F2(
 					},
 					model);
 			default:
-				var _v1 = $author$project$Page$Quest$Add$validate(model.form);
-				if (_v1.$ === 'Ok') {
-					var validForm = _v1.a;
+				var _v2 = $author$project$Page$Quest$Add$validate(model);
+				if (_v2.$ === 'Ok') {
+					var validForm = _v2.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{problems: _List_Nil}),
 						A2($author$project$Page$Quest$Add$submit, model.cred, validForm));
 				} else {
-					var problems = _v1.a;
+					var problems = _v2.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -12223,27 +12259,44 @@ var $author$project$Main$update = F2(
 						var session = _v3.a;
 						var page = _v3.b.a;
 						var subMsg = _v0.b.a;
-						var _v4 = A2($author$project$Page$Quest$Add$update, subMsg, page);
-						var updatedModel = _v4.a;
-						var cmd = _v4.b;
-						return _Utils_Tuple2(
-							A2(
-								$author$project$Main$Authenticated,
-								session,
-								$author$project$Main$AddQuest(updatedModel)),
-							A2($elm$core$Platform$Cmd$map, $author$project$Main$GotAddQuestMsg, cmd));
+						if ((subMsg.$ === 'AddedQuest') && (subMsg.a.$ === 'Ok')) {
+							var _v5 = A2($author$project$Page$Quest$Add$update, subMsg, page);
+							var updatedModel = _v5.a;
+							var cmd = _v5.b;
+							return _Utils_Tuple2(
+								A2(
+									$author$project$Main$Authenticated,
+									session,
+									$author$project$Main$AddQuest(updatedModel)),
+								$elm$core$Platform$Cmd$batch(
+									_List_fromArray(
+										[
+											A2($elm$browser$Browser$Navigation$pushUrl, session.key, '/'),
+											A2($elm$core$Platform$Cmd$map, $author$project$Main$GotAddQuestMsg, cmd)
+										])));
+						} else {
+							var _v6 = A2($author$project$Page$Quest$Add$update, subMsg, page);
+							var updatedModel = _v6.a;
+							var cmd = _v6.b;
+							return _Utils_Tuple2(
+								A2(
+									$author$project$Main$Authenticated,
+									session,
+									$author$project$Main$AddQuest(updatedModel)),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$GotAddQuestMsg, cmd));
+						}
 					} else {
 						break _v0$6;
 					}
 				case 'GotQuestListMsg':
 					if ((_v0.a.$ === 'Authenticated') && (_v0.a.b.$ === 'QuestList')) {
-						var _v5 = _v0.a;
-						var session = _v5.a;
-						var page = _v5.b.a;
+						var _v7 = _v0.a;
+						var session = _v7.a;
+						var page = _v7.b.a;
 						var subMsg = _v0.b.a;
-						var _v6 = A2($author$project$Page$Quest$List$update, subMsg, page);
-						var updatedModel = _v6.a;
-						var cmd = _v6.b;
+						var _v8 = A2($author$project$Page$Quest$List$update, subMsg, page);
+						var updatedModel = _v8.a;
+						var cmd = _v8.b;
 						return _Utils_Tuple2(
 							A2(
 								$author$project$Main$Authenticated,
@@ -12257,9 +12310,9 @@ var $author$project$Main$update = F2(
 					if (_v0.a.$ === 'Unauthenticated') {
 						var loginModel = _v0.a.a;
 						var loginMsg = _v0.b.a;
-						var _v7 = A2($author$project$Page$Login$update, loginMsg, loginModel);
-						var newLoginModel = _v7.a;
-						var cmd = _v7.b;
+						var _v9 = A2($author$project$Page$Login$update, loginMsg, loginModel);
+						var newLoginModel = _v9.a;
+						var cmd = _v9.b;
 						return _Utils_Tuple2(
 							$author$project$Main$Unauthenticated(newLoginModel),
 							A2($elm$core$Platform$Cmd$map, $author$project$Main$GotLoginMsg, cmd));
@@ -19459,6 +19512,37 @@ var $author$project$Page$Quest$Add$fab = function (theme) {
 var $author$project$Page$Quest$Add$EnteredCategory = function (a) {
 	return {$: 'EnteredCategory', a: a};
 };
+var $author$project$Page$Quest$Add$maxLength = F3(
+	function (theme, max, field) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$size(16)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$color(
+							A2($author$project$Theme$highlight, theme.kind, 0.87))
+						]),
+					$mdgriffith$elm_ui$Element$text(
+						$elm$core$String$fromInt(
+							$elm$core$String$length(field)))),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$color(
+							A2($author$project$Theme$highlight, theme.kind, 0.6))
+						]),
+					$mdgriffith$elm_ui$Element$text(
+						'/' + $elm$core$String$fromInt(max)))
+				]));
+	});
 var $author$project$Page$Quest$Add$inputError = F2(
 	function (theme, problem) {
 		return A2(
@@ -19546,7 +19630,8 @@ var $author$project$Page$Quest$Add$inputCategory = function (model) {
 										]),
 									$mdgriffith$elm_ui$Element$text('Category*'))),
 							text: model.form.category
-						})
+						}),
+						A3($author$project$Page$Quest$Add$maxLength, model.theme, $author$project$Page$Quest$Add$maxCategoryLength, model.form.category)
 					])),
 				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$Category, model.problems)
 			]));
@@ -19604,7 +19689,8 @@ var $author$project$Page$Quest$Add$inputDescription = function (model) {
 										]),
 									$mdgriffith$elm_ui$Element$text('Description*'))),
 							text: model.form.description
-						})
+						}),
+						A3($author$project$Page$Quest$Add$maxLength, model.theme, $author$project$Page$Quest$Add$maxDescriptionLength, model.form.description)
 					])),
 				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$Description, model.problems)
 			]));
@@ -19657,7 +19743,8 @@ var $author$project$Page$Quest$Add$inputMoreInfo = function (model) {
 								$mdgriffith$elm_ui$Element$Border$width(0),
 								$mdgriffith$elm_ui$Element$Background$color(
 								A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0)),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
 						{
 							label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
@@ -19673,7 +19760,15 @@ var $author$project$Page$Quest$Add$inputMoreInfo = function (model) {
 									$mdgriffith$elm_ui$Element$text('More info'))),
 							spellcheck: true,
 							text: model.form.moreInfo
-						})
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								A2($mdgriffith$elm_ui$Element$paddingXY, 0, 16)
+							]),
+						A3($author$project$Page$Quest$Add$maxLength, model.theme, $author$project$Page$Quest$Add$maxMoreInfoLength, model.form.moreInfo))
 					])),
 				A3($author$project$Page$Quest$Add$viewFieldErrors, model.theme, $author$project$Page$Quest$Add$MoreInfo, model.problems)
 			]));

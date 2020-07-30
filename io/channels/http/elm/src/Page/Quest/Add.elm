@@ -1,4 +1,4 @@
-module Page.Quest.Add exposing (Model, Msg, init, update, view)
+module Page.Quest.Add exposing (Model, Msg(..), init, update, view)
 
 import Api exposing (Cred)
 import Api.Endpoint as Endpoint
@@ -81,28 +81,55 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddedQuest (Err error) ->
-            ( model, Cmd.none )
+            -- Here we should go ahead and figure out the status that is returned to specifically set errors
+            -- About the input (for example in this case the title already exists error)
+            case error of
+                Http.BadStatus 409 ->
+                    ( { model | problems = List.append model.problems [ InvalidEntry Title "Title already exists." ] }, Cmd.none )
 
-        AddedQuest (Ok quest) ->
+                _ ->
+                    let
+                        serverErrors =
+                            Api.decodeErrors error
+                                |> List.map ServerError
+
+                        newModel =
+                            { model | problems = List.append model.problems serverErrors }
+                    in
+                    ( newModel, Cmd.none )
+
+        AddedQuest (Ok _) ->
             ( { model | form = emptyForm }, Cmd.none )
 
         EnteredTitle title ->
             updateForm (\form -> { form | title = title }) model
 
         EnteredDescription description ->
-            updateForm (\form -> { form | description = description }) model
+            if String.length description > maxDescriptionLength then
+                ( model, Cmd.none )
+
+            else
+                updateForm (\form -> { form | description = description }) model
 
         EnteredCategory category ->
-            updateForm (\form -> { form | category = category }) model
+            if String.length category > maxCategoryLength then
+                ( model, Cmd.none )
+
+            else
+                updateForm (\form -> { form | category = category }) model
 
         EnteredTimeEstimate timeEstimate ->
             updateForm (\form -> { form | timeEstimate = timeEstimate }) model
 
         EnteredMoreInfo moreInfo ->
-            updateForm (\form -> { form | moreInfo = moreInfo }) model
+            if String.length moreInfo > maxMoreInfoLength then
+                ( model, Cmd.none )
+
+            else
+                updateForm (\form -> { form | moreInfo = moreInfo }) model
 
         SubmittedForm ->
-            case validate model.form of
+            case validate model of
                 Ok validForm ->
                     ( { model | problems = [] }
                     , submit model.cred validForm
@@ -123,6 +150,21 @@ it to the server without having trimmed it!
 -}
 type TrimmedForm
     = Trimmed Form
+
+
+maxDescriptionLength : Int
+maxDescriptionLength =
+    80
+
+
+maxCategoryLength : Int
+maxCategoryLength =
+    80
+
+
+maxMoreInfoLength : Int
+maxMoreInfoLength =
+    255
 
 
 {-| Helper function for `update`. Updates the form and returns Cmd.none.
@@ -152,11 +194,11 @@ fieldsToValidate =
 
 {-| Trim the form and validate its fields. If there are problems, report them!
 -}
-validate : Form -> Result (List Problem) TrimmedForm
-validate form =
+validate : Model -> Result (List Problem) TrimmedForm
+validate model =
     let
         trimmedForm =
-            trimFields form
+            trimFields model.form
     in
     case List.concatMap (validateField trimmedForm) fieldsToValidate of
         [] ->
@@ -356,6 +398,7 @@ inputDescription model =
                 , placeholder = Just <| Input.placeholder [ Font.color <| Theme.highlight model.theme.kind 0.38 ] (text "Description*")
                 , label = Input.labelHidden ""
                 }
+            , maxLength model.theme maxDescriptionLength model.form.description
             ]
         , viewFieldErrors model.theme Description model.problems
         ]
@@ -385,6 +428,7 @@ inputCategory model =
                 , placeholder = Just <| Input.placeholder [ Font.color <| Theme.highlight model.theme.kind 0.38 ] (text "Category*")
                 , label = Input.labelHidden ""
                 }
+            , maxLength model.theme maxCategoryLength model.form.category
             ]
         , viewFieldErrors model.theme Category model.problems
         ]
@@ -438,6 +482,7 @@ inputMoreInfo model =
                 , Border.width 0
                 , Background.color (rgba255 0 0 0 0)
                 , height fill
+                , width fill
                 ]
                 { onChange = EnteredMoreInfo
                 , text = model.form.moreInfo
@@ -445,8 +490,23 @@ inputMoreInfo model =
                 , label = Input.labelHidden ""
                 , spellcheck = True
                 }
+            , Element.el
+                [ height fill
+                , paddingXY 0 16
+                ]
+              <|
+                maxLength model.theme maxMoreInfoLength model.form.moreInfo
             ]
         , viewFieldErrors model.theme MoreInfo model.problems
+        ]
+
+
+maxLength : Theme -> Int -> String -> Element msg
+maxLength theme max field =
+    row
+        [ Font.size 16 ]
+        [ Element.el [ Font.color <| Theme.highlight theme.kind 0.87 ] <| text (String.fromInt <| String.length field)
+        , Element.el [ Font.color <| Theme.highlight theme.kind 0.6 ] <| text <| "/" ++ String.fromInt max
         ]
 
 

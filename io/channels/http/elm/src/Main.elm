@@ -80,11 +80,20 @@ update msg model =
                     ( Authenticated session page, Nav.load href )
 
         ( Authenticated session (AddQuest page), GotAddQuestMsg subMsg ) ->
-            let
-                ( updatedModel, cmd ) =
-                    Page.Quest.Add.update subMsg page
-            in
-            ( Authenticated session (AddQuest updatedModel), Cmd.map GotAddQuestMsg cmd )
+            case subMsg of
+                Page.Quest.Add.AddedQuest (Ok _) ->
+                    let
+                        ( updatedModel, cmd ) =
+                            Page.Quest.Add.update subMsg page
+                    in
+                    ( Authenticated session (AddQuest updatedModel), Cmd.batch [ Nav.pushUrl session.key "/", Cmd.map GotAddQuestMsg cmd ] )
+
+                _ ->
+                    let
+                        ( updatedModel, cmd ) =
+                            Page.Quest.Add.update subMsg page
+                    in
+                    ( Authenticated session (AddQuest updatedModel), Cmd.map GotAddQuestMsg cmd )
 
         ( Authenticated session (QuestList page), GotQuestListMsg subMsg ) ->
             let
