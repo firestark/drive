@@ -10854,6 +10854,22 @@ var $author$project$Main$GotQuestListMsg = function (a) {
 var $author$project$Main$QuestList = function (a) {
 	return {$: 'QuestList', a: a};
 };
+var $author$project$Route$QuestList = {$: 'QuestList'};
+var $author$project$Page$Login$Form = F2(
+	function (name, password) {
+		return {name: name, password: password};
+	});
+var $author$project$Page$Login$init = F2(
+	function (key, theme) {
+		return {
+			form: A2($author$project$Page$Login$Form, '', ''),
+			key: key,
+			problems: _List_Nil,
+			showPassword: false,
+			showSnackbar: false,
+			theme: theme
+		};
+	});
 var $author$project$Page$Quest$Add$emptyForm = {category: '', description: '', moreInfo: '', timeEstimate: '', title: ''};
 var $author$project$Page$Quest$Add$init = F2(
 	function (cred, theme) {
@@ -11254,7 +11270,7 @@ var $author$project$Page$Quest$List$request = function (cred) {
 var $author$project$Page$Quest$List$init = F3(
 	function (snackbarTxt, cred, theme) {
 		return _Utils_Tuple2(
-			{dialog: $author$project$Page$Quest$List$Closed, questList: $krisajenkins$remotedata$RemoteData$NotAsked, searchText: '', snackbar: snackbarTxt, theme: theme},
+			{dialog: $author$project$Page$Quest$List$Closed, menuOpen: false, questList: $krisajenkins$remotedata$RemoteData$NotAsked, searchText: '', snackbar: snackbarTxt, theme: theme},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
 					[
@@ -11262,6 +11278,22 @@ var $author$project$Page$Quest$List$init = F3(
 						A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$HideSnackbar)
 					])));
 	});
+var $elm$core$Maybe$destruct = F3(
+	function (_default, func, maybe) {
+		if (maybe.$ === 'Just') {
+			var a = maybe.a;
+			return func(a);
+		} else {
+			return _default;
+		}
+	});
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Api$storeCache = _Platform_outgoingPort(
+	'storeCache',
+	function ($) {
+		return A3($elm$core$Maybe$destruct, $elm$json$Json$Encode$null, $elm$core$Basics$identity, $);
+	});
+var $author$project$Api$logout = $author$project$Api$storeCache($elm$core$Maybe$Nothing);
 var $author$project$Main$changeRouteTo = F2(
 	function (maybeRoute, model) {
 		if (model.$ === 'Authenticated') {
@@ -11269,26 +11301,39 @@ var $author$project$Main$changeRouteTo = F2(
 			if (maybeRoute.$ === 'Nothing') {
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			} else {
-				if (maybeRoute.a.$ === 'AddQuest') {
-					var _v2 = maybeRoute.a;
-					var subModel = A2($author$project$Page$Quest$Add$init, session.cred, session.theme);
-					return _Utils_Tuple2(
-						A2(
-							$author$project$Main$Authenticated,
-							session,
-							$author$project$Main$AddQuest(subModel)),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					var _v3 = maybeRoute.a;
-					var _v4 = A3($author$project$Page$Quest$List$init, session.snackbar, session.cred, session.theme);
-					var subModel = _v4.a;
-					var cmd = _v4.b;
-					return _Utils_Tuple2(
-						A2(
-							$author$project$Main$Authenticated,
-							session,
-							$author$project$Main$QuestList(subModel)),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$GotQuestListMsg, cmd));
+				switch (maybeRoute.a.$) {
+					case 'AddQuest':
+						var _v2 = maybeRoute.a;
+						var subModel = A2($author$project$Page$Quest$Add$init, session.cred, session.theme);
+						return _Utils_Tuple2(
+							A2(
+								$author$project$Main$Authenticated,
+								session,
+								$author$project$Main$AddQuest(subModel)),
+							$elm$core$Platform$Cmd$none);
+					case 'Completions':
+						var _v3 = maybeRoute.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Logout':
+						var _v4 = maybeRoute.a;
+						var _v5 = A2(
+							$author$project$Main$changeRouteTo,
+							$elm$core$Maybe$Just($author$project$Route$QuestList),
+							$author$project$Main$Unauthenticated(
+								A2($author$project$Page$Login$init, session.key, session.theme)));
+						var newModel = _v5.a;
+						return _Utils_Tuple2(newModel, $author$project$Api$logout);
+					default:
+						var _v6 = maybeRoute.a;
+						var _v7 = A3($author$project$Page$Quest$List$init, session.snackbar, session.cred, session.theme);
+						var subModel = _v7.a;
+						var cmd = _v7.b;
+						return _Utils_Tuple2(
+							A2(
+								$author$project$Main$Authenticated,
+								session,
+								$author$project$Main$QuestList(subModel)),
+							A2($elm$core$Platform$Cmd$map, $author$project$Main$GotQuestListMsg, cmd));
 				}
 			}
 		} else {
@@ -11298,32 +11343,6 @@ var $author$project$Main$changeRouteTo = F2(
 var $author$project$Viewer$cred = function (_v0) {
 	var val = _v0.b;
 	return val;
-};
-var $author$project$Theme$Dark = {$: 'Dark'};
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
-var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
-var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
-var $author$project$Material$Color$red500 = A3($mdgriffith$elm_ui$Element$rgb255, 244, 67, 54);
-var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
-var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
-var $author$project$Theme$dark = {
-	background: A3($mdgriffith$elm_ui$Element$rgb255, 48, 48, 48),
-	error: $author$project$Material$Color$red500,
-	kind: $author$project$Theme$Dark,
-	onBackground: $author$project$Material$Color$white,
-	onPrimary: $author$project$Material$Color$white,
-	onSecondary: $author$project$Material$Color$black,
-	onSurface: $author$project$Material$Color$white,
-	primary: $author$project$Material$Color$deepPurple500,
-	secondary: $author$project$Material$Color$tealA400,
-	surface: A3($mdgriffith$elm_ui$Element$rgb255, 66, 66, 66)
 };
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
@@ -11445,7 +11464,8 @@ var $elm$url$Url$Parser$parse = F2(
 					$elm$core$Basics$identity)));
 	});
 var $author$project$Route$AddQuest = {$: 'AddQuest'};
-var $author$project$Route$QuestList = {$: 'QuestList'};
+var $author$project$Route$Completions = {$: 'Completions'};
+var $author$project$Route$Logout = {$: 'Logout'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -11531,7 +11551,15 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$AddQuest,
-			$elm$url$Url$Parser$s('add'))
+			$elm$url$Url$Parser$s('add')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Completions,
+			$elm$url$Url$Parser$s('completions')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Logout,
+			$elm$url$Url$Parser$s('logout'))
 		]));
 var $author$project$Route$fromUrl = function (url) {
 	return A2(
@@ -11544,24 +11572,34 @@ var $author$project$Route$fromUrl = function (url) {
 				path: A2($elm$core$Maybe$withDefault, '', url.fragment)
 			}));
 };
-var $author$project$Page$Login$Form = F2(
-	function (name, password) {
-		return {name: name, password: password};
+var $author$project$Theme$Light = {$: 'Light'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
 	});
-var $author$project$Page$Login$init = F2(
-	function (key, theme) {
-		return {
-			form: A2($author$project$Page$Login$Form, '', ''),
-			key: key,
-			problems: _List_Nil,
-			showPassword: false,
-			showSnackbar: false,
-			theme: theme
-		};
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
+var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
+var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
+var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
+var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$Theme$light = {
+	background: $author$project$Material$Color$white,
+	error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
+	kind: $author$project$Theme$Light,
+	onBackground: $author$project$Material$Color$black,
+	onPrimary: $author$project$Material$Color$white,
+	onSecondary: $author$project$Material$Color$black,
+	onSurface: $author$project$Material$Color$black,
+	primary: $author$project$Material$Color$deepPurple500,
+	secondary: $author$project$Material$Color$tealA400,
+	surface: $author$project$Material$Color$white
+};
 var $author$project$Main$init = F3(
 	function (maybeViewer, url, navKey) {
-		var theme = $author$project$Theme$dark;
+		var theme = $author$project$Theme$light;
 		if (maybeViewer.$ === 'Just') {
 			var viewer = maybeViewer.a;
 			return A2(
@@ -11615,6 +11653,27 @@ var $author$project$Main$GotLoginMsg = function (a) {
 };
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $author$project$Route$routeToPieces = function (page) {
+	switch (page.$) {
+		case 'AddQuest':
+			return _List_fromArray(
+				['add']);
+		case 'Completions':
+			return _List_fromArray(
+				['completions']);
+		case 'Logout':
+			return _List_fromArray(
+				['logout']);
+		default:
+			return _List_Nil;
+	}
+};
+var $author$project$Route$toString = function (page) {
+	return '/#/' + A2(
+		$elm$core$String$join,
+		'/',
+		$author$project$Route$routeToPieces(page));
+};
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -11764,7 +11823,6 @@ var $author$project$Page$Login$login = function (_v0) {
 		$author$project$Page$Login$CompletedLogin,
 		$author$project$Viewer$decoder);
 };
-var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Avatar$encode = function (_v0) {
 	var maybeUrl = _v0.a;
 	if (maybeUrl.$ === 'Just') {
@@ -11778,20 +11836,6 @@ var $author$project$Username$encode = function (_v0) {
 	var username = _v0.a;
 	return $elm$json$Json$Encode$string(username);
 };
-var $elm$core$Maybe$destruct = F3(
-	function (_default, func, maybe) {
-		if (maybe.$ === 'Just') {
-			var a = maybe.a;
-			return func(a);
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Api$storeCache = _Platform_outgoingPort(
-	'storeCache',
-	function ($) {
-		return A3($elm$core$Maybe$destruct, $elm$json$Json$Encode$null, $elm$core$Basics$identity, $);
-	});
 var $author$project$Api$storeCredWith = F2(
 	function (_v0, avatar) {
 		var name = _v0.a;
@@ -12226,6 +12270,18 @@ var $author$project$Page$Quest$List$update = F2(
 						model,
 						{snackbar: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
+			case 'MenuClosed':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{menuOpen: false}),
+					$elm$core$Platform$Cmd$none);
+			case 'MenuToggled':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{menuOpen: !model.menuOpen}),
+					$elm$core$Platform$Cmd$none);
 			case 'OpenDialog':
 				var title = msg.a;
 				var moreInfo = msg.b;
@@ -12351,7 +12407,7 @@ var $author$project$Main$update = F2(
 						var maybeViewer = _v0.b.a;
 						if (maybeViewer.$ === 'Just') {
 							var viewer = maybeViewer.a;
-							return A2(
+							var _v11 = A2(
 								$author$project$Main$changeRouteTo,
 								$elm$core$Maybe$Just($author$project$Route$QuestList),
 								A2(
@@ -12363,6 +12419,13 @@ var $author$project$Main$update = F2(
 										theme: loginModel.theme
 									},
 									$author$project$Main$Redirect));
+							var newModel = _v11.a;
+							return _Utils_Tuple2(
+								newModel,
+								A2(
+									$elm$browser$Browser$Navigation$pushUrl,
+									loginModel.key,
+									$author$project$Route$toString($author$project$Route$QuestList)));
 						} else {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
@@ -19987,20 +20050,6 @@ var $mdgriffith$elm_ui$Element$link = F2(
 				_List_fromArray(
 					[label])));
 	});
-var $author$project$Route$routeToPieces = function (page) {
-	if (page.$ === 'AddQuest') {
-		return _List_fromArray(
-			['add']);
-	} else {
-		return _List_Nil;
-	}
-};
-var $author$project$Route$toString = function (page) {
-	return '/#/' + A2(
-		$elm$core$String$join,
-		'/',
-		$author$project$Route$routeToPieces(page));
-};
 var $author$project$Page$Quest$Add$topAppBarRow = F3(
 	function (theme, attributes, elements) {
 		return A2(
@@ -20095,6 +20144,7 @@ var $author$project$Page$Quest$Add$view = function (model) {
 			]));
 };
 var $author$project$Page$Quest$List$CloseDialog = {$: 'CloseDialog'};
+var $author$project$Page$Quest$List$MenuClosed = {$: 'MenuClosed'};
 var $author$project$Page$Quest$List$filter = F2(
 	function (text, quest) {
 		return A2($elm$core$String$contains, text, quest.title) ? true : (A2($elm$core$String$contains, text, quest.description) ? true : (A2($elm$core$String$contains, text, quest.category) ? true : (A2($elm$core$String$contains, text, quest.timeEstimate) ? true : A2($elm$core$String$contains, text, quest.moreInfo))));
@@ -20715,8 +20765,77 @@ var $author$project$Page$Quest$List$snackbar = function (txt) {
 					]))
 			]));
 };
+var $author$project$Page$Quest$List$MenuToggled = {$: 'MenuToggled'};
 var $author$project$Page$Quest$List$UpdateSearch = function (a) {
 	return {$: 'UpdateSearch', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$below = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
+};
+var $mdgriffith$elm_ui$Internal$Model$Active = {$: 'Active'};
+var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
+var $mdgriffith$elm_ui$Element$mouseDown = function (decs) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$active,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
+			$mdgriffith$elm_ui$Internal$Model$Active,
+			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
+var $author$project$Page$Quest$List$menuItem = F3(
+	function (theme, route, txt) {
+		return A2(
+			$mdgriffith$elm_ui$Element$link,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(48)),
+					A2($mdgriffith$elm_ui$Element$paddingXY, 16, 0),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$mouseDown(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A2($author$project$Theme$highlight, theme.kind, 0.12))
+						])),
+					$mdgriffith$elm_ui$Element$mouseOver(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A2($author$project$Theme$highlight, theme.kind, 0.04))
+						]))
+				]),
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerY]),
+					$mdgriffith$elm_ui$Element$text(txt)),
+				url: $author$project$Route$toString(route)
+			});
+	});
+var $author$project$Material$Elevation$z8 = $mdgriffith$elm_ui$Element$htmlAttribute(
+	A2($elm$html$Html$Attributes$style, 'box-shadow', '0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12)'));
+var $author$project$Page$Quest$List$menu = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Background$color(theme.surface),
+				$mdgriffith$elm_ui$Element$alignRight,
+				$mdgriffith$elm_ui$Element$Font$size(16),
+				$mdgriffith$elm_ui$Element$Font$color(theme.onSurface),
+				A2($mdgriffith$elm_ui$Element$paddingXY, 0, 8),
+				$mdgriffith$elm_ui$Element$Border$rounded(4),
+				$author$project$Material$Elevation$z8
+			]),
+		_List_fromArray(
+			[
+				A3($author$project$Page$Quest$List$menuItem, theme, $author$project$Route$Completions, 'My completions'),
+				A3($author$project$Page$Quest$List$menuItem, theme, $author$project$Route$Logout, 'Logout')
+			]));
 };
 var $author$project$Material$Icons$search = $mdgriffith$elm_ui$Element$html(
 	A2(
@@ -20802,7 +20921,11 @@ var $author$project$Page$Quest$List$input = function (model) {
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$Font$color(
-						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.54))
+						A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0.54)),
+						$mdgriffith$elm_ui$Element$pointer,
+						$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$Quest$List$MenuToggled),
+						model.menuOpen ? $mdgriffith$elm_ui$Element$below(
+						$author$project$Page$Quest$List$menu(model.theme)) : $mdgriffith$elm_ui$Element$below($mdgriffith$elm_ui$Element$none)
 					]),
 				$author$project$Material$Icons$account_circle)
 			]));
@@ -20901,7 +21024,8 @@ var $author$project$Page$Quest$List$view = function (model) {
 					} else {
 						return $mdgriffith$elm_ui$Element$none;
 					}
-				}())
+				}()),
+				model.menuOpen ? $mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$Quest$List$MenuClosed) : $mdgriffith$elm_ui$Element$inFront($mdgriffith$elm_ui$Element$none)
 			]),
 		_List_fromArray(
 			[
@@ -21263,4 +21387,4 @@ var $author$project$Main$main = A2(
 	$author$project$Api$application,
 	$author$project$Viewer$decoder,
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"HideSnackbar":[],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"HideSnackbar":[],"MenuClosed":[],"MenuToggled":[],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));

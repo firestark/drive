@@ -44,7 +44,7 @@ init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.dark
+            Theme.light
     in
     case maybeViewer of
         Just viewer ->
@@ -113,16 +113,20 @@ update msg model =
         ( Unauthenticated loginModel, ViewerChanged maybeViewer ) ->
             case maybeViewer of
                 Just viewer ->
-                    changeRouteTo
-                        (Just Route.QuestList)
-                    <|
-                        Authenticated
-                            { cred = Viewer.cred viewer
-                            , key = loginModel.key
-                            , snackbar = Nothing
-                            , theme = loginModel.theme
-                            }
-                            Redirect
+                    let
+                        ( newModel, _ ) =
+                            changeRouteTo
+                                (Just Route.QuestList)
+                            <|
+                                Authenticated
+                                    { cred = Viewer.cred viewer
+                                    , key = loginModel.key
+                                    , snackbar = Nothing
+                                    , theme = loginModel.theme
+                                    }
+                                    Redirect
+                    in
+                    ( newModel, Nav.pushUrl loginModel.key (Route.toString Route.QuestList) )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -148,6 +152,16 @@ changeRouteTo maybeRoute model =
                             Page.Quest.Add.init session.cred session.theme
                     in
                     ( Authenticated session (AddQuest subModel), Cmd.none )
+
+                Just Route.Completions ->
+                    ( model, Cmd.none )
+
+                Just Route.Logout ->
+                    let
+                        ( newModel, _ ) =
+                            changeRouteTo (Just Route.QuestList) (Unauthenticated <| Page.Login.init session.key session.theme)
+                    in
+                    ( newModel, Api.logout )
 
                 Just Route.QuestList ->
                     let

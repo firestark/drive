@@ -2,7 +2,7 @@ module Page.Quest.List exposing (Model, Msg, init, update, view)
 
 import Api exposing (Cred)
 import Api.Endpoint as Endpoint
-import Element exposing (Element, centerX, centerY, column, el, fill, height, maximum, paddingXY, px, rgb255, rgba255, row, scrollbarY, spacing, text, width)
+import Element exposing (Element, centerX, centerY, column, el, fill, height, maximum, paddingXY, pointer, px, rgb255, rgba255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Events exposing (onClick)
@@ -16,7 +16,7 @@ import Material.Icons as Icons
 import Process
 import Quest exposing (Quest)
 import RemoteData exposing (WebData)
-import Route
+import Route exposing (Route)
 import Task
 import Theme exposing (Theme)
 
@@ -27,6 +27,7 @@ type alias Model =
     , questList : WebData (List Quest)
     , dialog : Dialog
     , snackbar : Maybe String
+    , menuOpen : Bool
     }
 
 
@@ -39,6 +40,8 @@ type Msg
     = CloseDialog
     | GotQuests (WebData (List Quest))
     | HideSnackbar
+    | MenuClosed
+    | MenuToggled
     | OpenDialog String String
     | UpdateSearch String
 
@@ -50,6 +53,7 @@ init snackbarTxt cred theme =
       , questList = RemoteData.NotAsked
       , dialog = Closed
       , snackbar = snackbarTxt
+      , menuOpen = False
       }
     , Cmd.batch [ request cred, delay 5000 HideSnackbar ]
     )
@@ -77,6 +81,12 @@ update msg model =
 
         HideSnackbar ->
             ( { model | snackbar = Nothing }, Cmd.none )
+
+        MenuClosed ->
+            ( { model | menuOpen = False }, Cmd.none )
+
+        MenuToggled ->
+            ( { model | menuOpen = not model.menuOpen }, Cmd.none )
 
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
@@ -161,6 +171,11 @@ view model =
 
                 Nothing ->
                     Element.none
+        , if model.menuOpen then
+            onClick MenuClosed
+
+          else
+            Element.inFront Element.none
         ]
         [ topAppBar model
         , column
@@ -294,7 +309,17 @@ input model =
             , placeholder = Just <| placeholder [ Font.color <| rgba255 0 0 0 0.38 ] (text "Search quests")
             , label = Input.labelHidden ""
             }
-        , Element.el [ Font.color (rgba255 0 0 0 0.54) ] Icons.account_circle
+        , Element.el
+            [ Font.color (rgba255 0 0 0 0.54)
+            , pointer
+            , onClick MenuToggled
+            , if model.menuOpen then
+                Element.below <| menu model.theme
+
+              else
+                Element.below Element.none
+            ]
+            Icons.account_circle
         ]
 
 
@@ -440,4 +465,36 @@ fab theme =
         Fab.bottomRight
         { url = Route.toString Route.AddQuest
         , label = Fab.regular theme Icons.add
+        }
+
+
+menu : Theme -> Element msg
+menu theme =
+    column
+        [ Background.color theme.surface
+        , Element.alignRight
+        , Font.size 16
+        , Font.color theme.onSurface
+        , paddingXY 0 8
+        , Border.rounded 4
+        , Elevation.z8
+        ]
+        [ menuItem theme Route.Completions "My completions"
+        , menuItem theme Route.Logout "Logout"
+        ]
+
+
+menuItem : Theme -> Route -> String -> Element msg
+menuItem theme route txt =
+    Element.link
+        [ height (px 48)
+        , paddingXY 16 0
+        , width fill
+        , Element.mouseDown
+            [ Background.color <| Theme.highlight theme.kind 0.12 ]
+        , Element.mouseOver
+            [ Background.color <| Theme.highlight theme.kind 0.04 ]
+        ]
+        { url = Route.toString route
+        , label = Element.el [ centerY ] <| text txt
         }

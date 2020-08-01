@@ -1,8 +1,6 @@
-module Route exposing (Route(..), fromUrl, href, replaceUrl, toString)
+module Route exposing (Route(..), fromUrl, replaceUrl, toString)
 
 import Browser.Navigation as Nav
-import Html exposing (Attribute)
-import Html.Attributes as Attr
 import Url exposing (Url)
 import Url.Parser as Parser exposing (Parser, oneOf, s)
 
@@ -13,6 +11,8 @@ import Url.Parser as Parser exposing (Parser, oneOf, s)
 
 type Route
     = AddQuest
+    | Completions
+    | Logout
     | QuestList
 
 
@@ -21,16 +21,13 @@ parser =
     oneOf
         [ Parser.map QuestList Parser.top
         , Parser.map AddQuest (s "add")
+        , Parser.map Completions (s "completions")
+        , Parser.map Logout (s "logout")
         ]
 
 
 
 -- PUBLIC HELPERS
-
-
-href : Route -> Attribute msg
-href targetRoute =
-    Attr.href (toString targetRoute)
 
 
 replaceUrl : Nav.Key -> Route -> Cmd msg
@@ -61,6 +58,12 @@ routeToPieces page =
     case page of
         AddQuest ->
             [ "add" ]
+
+        Completions ->
+            [ "completions" ]
+
+        Logout ->
+            [ "logout" ]
 
         QuestList ->
             []
