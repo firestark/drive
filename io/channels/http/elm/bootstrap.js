@@ -12274,7 +12274,24 @@ var $author$project$Page$Quest$List$update = F2(
 						{dialog: $author$project$Page$Quest$List$Closed}),
 					$elm$core$Platform$Cmd$none);
 			case 'GotQuestCompletionResponse':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var response = msg.a;
+				if (response.$ === 'Success') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								snackbar: $elm$core$Maybe$Just('Completed quest.')
+							}),
+						A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$SnackbarHid));
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								snackbar: $elm$core$Maybe$Just('Something went wrong.')
+							}),
+						A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$SnackbarHid));
+				}
 			case 'GotQuests':
 				var response = msg.a;
 				return _Utils_Tuple2(

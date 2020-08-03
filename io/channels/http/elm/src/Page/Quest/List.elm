@@ -91,8 +91,13 @@ update msg model =
         CloseDialog ->
             ( { model | dialog = Closed }, Cmd.none )
 
-        GotQuestCompletionResponse _ ->
-            ( model, Cmd.none )
+        GotQuestCompletionResponse response ->
+            case response of
+                RemoteData.Success _ ->
+                    ( { model | snackbar = Just "Completed quest." }, delay 5000 SnackbarHid )
+
+                _ ->
+                    ( { model | snackbar = Just "Something went wrong." }, delay 5000 SnackbarHid )
 
         GotQuests response ->
             ( { model | questList = response }, Cmd.none )
