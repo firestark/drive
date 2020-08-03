@@ -5,6 +5,8 @@ use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 
+require __DIR__ . '/start.php';
+
 /**
  * Defines application features from the specific context.
  */
@@ -52,7 +54,7 @@ class QuestListContext implements Context
     public function anArtDirectorAddsTheFollowingQuest(TableNode $table)
     {
         foreach ($table->getHash() as $row)
-            $this->questManager->add($this->newQuest($row));
+            App::make('i want to add a quest', ['quest' => $this->newQuest($row), 'questManager' => $this->questManager]);        
     }
 
     /**
@@ -90,7 +92,7 @@ class QuestListContext implements Context
     public function anArtDirectorUpdatesAQuestWithTheTitleOfWithTheFollowingInformation(string $title, TableNode $table)
     {
         foreach ($table->getHash() as $row)
-            $this->questManager->change($title, $this->newQuest($row));            
+            App::make('i want to change a quest', ['title' => $title, 'quest' => $this->newQuest($row), 'questManager' => $this->questManager]);
     }
 
     /**
@@ -106,7 +108,7 @@ class QuestListContext implements Context
      */
     public function anArtDirectorRemovesTheQuestWithATitleOf(string $title)
     {
-        $this->questManager->remove($title);
+        App::make('i want to remove a quest', ['title' => $title, 'questManager' => $this->questManager]);
     }
 
     /**
@@ -114,7 +116,11 @@ class QuestListContext implements Context
      */
     public function completesTheQuestWithTheTitleOf(string $name, string $title)
     {
-        $this->artDirectorManager->find($name)->complete($title);
+        App::make('i want to complete a quest', [
+            'artDirector' => $this->artDirectorManager->find($name),
+            'ArtDirectorManager' => $this->artDirectorManager,
+            'quest' => $this->questManager->find($title)
+        ]);
     }
 
     /**
@@ -122,7 +128,11 @@ class QuestListContext implements Context
      */
     public function uncompletesTheQuestWithTheTitleOf(string $name, string $title)
     {
-        $this->artDirectorManager->find($name)->uncomplete($title);
+        App::make('i want to uncomplete a quest', [
+            'artDirector' => $this->artDirectorManager->find($name),
+            'ArtDirectorManager' => $this->artDirectorManager,
+            'quest' => $this->questManager->find($title)
+        ]);
     }
 
     /**

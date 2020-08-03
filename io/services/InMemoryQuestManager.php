@@ -9,6 +9,14 @@ class InMemoryQuestManager extends QuestManager
         return $this->quests;
     }
 
+    public function find(string $title): Quest
+    {
+        if (! $this->has($title))
+            throw new Exception("Can't find a quest with title: {$title}.");
+
+        return $this->quests[$title];
+    }
+
     protected function create(Quest $quest)
     {
         $this->quests[$quest->title] = $quest;

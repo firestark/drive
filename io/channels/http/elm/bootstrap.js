@@ -10876,8 +10876,8 @@ var $author$project$Page$Quest$Add$init = F2(
 		return {cred: cred, form: $author$project$Page$Quest$Add$emptyForm, problems: _List_Nil, theme: theme};
 	});
 var $author$project$Page$Quest$List$Closed = {$: 'Closed'};
-var $author$project$Page$Quest$List$HideSnackbar = {$: 'HideSnackbar'};
 var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
+var $author$project$Page$Quest$List$SnackbarHid = {$: 'SnackbarHid'};
 var $elm$core$Process$sleep = _Process_sleep;
 var $author$project$Page$Quest$List$delay = F2(
 	function (time, msg) {
@@ -11275,7 +11275,13 @@ var $author$project$Page$Quest$List$init = F3(
 				_List_fromArray(
 					[
 						$author$project$Page$Quest$List$request(cred),
-						A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$HideSnackbar)
+						function () {
+						if (snackbarTxt.$ === 'Just') {
+							return A2($author$project$Page$Quest$List$delay, 5000, $author$project$Page$Quest$List$SnackbarHid);
+						} else {
+							return $elm$core$Platform$Cmd$none;
+						}
+					}()
 					])));
 	});
 var $elm$core$Maybe$destruct = F3(
@@ -11343,6 +11349,32 @@ var $author$project$Main$changeRouteTo = F2(
 var $author$project$Viewer$cred = function (_v0) {
 	var val = _v0.b;
 	return val;
+};
+var $author$project$Theme$Dark = {$: 'Dark'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
+var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
+var $author$project$Material$Color$red500 = A3($mdgriffith$elm_ui$Element$rgb255, 244, 67, 54);
+var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
+var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$Theme$dark = {
+	background: A3($mdgriffith$elm_ui$Element$rgb255, 48, 48, 48),
+	error: $author$project$Material$Color$red500,
+	kind: $author$project$Theme$Dark,
+	onBackground: $author$project$Material$Color$white,
+	onPrimary: $author$project$Material$Color$white,
+	onSecondary: $author$project$Material$Color$black,
+	onSurface: $author$project$Material$Color$white,
+	primary: $author$project$Material$Color$deepPurple500,
+	secondary: $author$project$Material$Color$tealA400,
+	surface: A3($mdgriffith$elm_ui$Element$rgb255, 66, 66, 66)
 };
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
@@ -11572,34 +11604,9 @@ var $author$project$Route$fromUrl = function (url) {
 				path: A2($elm$core$Maybe$withDefault, '', url.fragment)
 			}));
 };
-var $author$project$Theme$Light = {$: 'Light'};
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
-var $author$project$Material$Color$black = A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0);
-var $author$project$Material$Color$deepPurple500 = A3($mdgriffith$elm_ui$Element$rgb255, 103, 58, 183);
-var $author$project$Material$Color$tealA400 = A3($mdgriffith$elm_ui$Element$rgb255, 29, 233, 182);
-var $author$project$Material$Color$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
-var $author$project$Theme$light = {
-	background: $author$project$Material$Color$white,
-	error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
-	kind: $author$project$Theme$Light,
-	onBackground: $author$project$Material$Color$black,
-	onPrimary: $author$project$Material$Color$white,
-	onSecondary: $author$project$Material$Color$black,
-	onSurface: $author$project$Material$Color$black,
-	primary: $author$project$Material$Color$deepPurple500,
-	secondary: $author$project$Material$Color$tealA400,
-	surface: $author$project$Material$Color$white
-};
 var $author$project$Main$init = F3(
 	function (maybeViewer, url, navKey) {
-		var theme = $author$project$Theme$light;
+		var theme = $author$project$Theme$dark;
 		if (maybeViewer.$ === 'Just') {
 			var viewer = maybeViewer.a;
 			return A2(
@@ -12264,12 +12271,6 @@ var $author$project$Page$Quest$List$update = F2(
 						model,
 						{questList: response}),
 					$elm$core$Platform$Cmd$none);
-			case 'HideSnackbar':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{snackbar: $elm$core$Maybe$Nothing}),
-					$elm$core$Platform$Cmd$none);
 			case 'MenuClosed':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -12292,6 +12293,14 @@ var $author$project$Page$Quest$List$update = F2(
 							dialog: $author$project$Page$Quest$List$Open(
 								{moreInfo: moreInfo, title: title})
 						}),
+					$elm$core$Platform$Cmd$none);
+			case 'QuestClicked':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'SnackbarHid':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{snackbar: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				var text = msg.a;
@@ -20175,6 +20184,9 @@ var $author$project$Page$Quest$List$OpenDialog = F2(
 	function (a, b) {
 		return {$: 'OpenDialog', a: a, b: b};
 	});
+var $author$project$Page$Quest$List$QuestClicked = function (a) {
+	return {$: 'QuestClicked', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
 var $author$project$Page$Quest$List$icon = F3(
@@ -20231,6 +20243,23 @@ var $author$project$Material$Icons$info = $mdgriffith$elm_ui$Element$html(
 					]),
 				_List_Nil)
 			])));
+var $elm$virtual_dom$VirtualDom$Custom = function (a) {
+	return {$: 'Custom', a: a};
+};
+var $elm$html$Html$Events$custom = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Custom(decoder));
+	});
+var $author$project$Page$Quest$List$onClickNoBubble = function (message) {
+	return A2(
+		$elm$html$Html$Events$custom,
+		'click',
+		$elm$json$Json$Decode$succeed(
+			{message: message, preventDefault: true, stopPropagation: true}));
+};
 var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
 var $mdgriffith$elm_ui$Element$paragraph = F2(
 	function (attrs, children) {
@@ -20297,7 +20326,8 @@ var $author$project$Page$Quest$List$threeElement = F2(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(32)
+					$mdgriffith$elm_ui$Element$spacing(32),
+					$mdgriffith$elm_ui$Element$pointer
 				]),
 			_List_fromArray(
 				[
@@ -20314,7 +20344,9 @@ var $author$project$Page$Quest$List$threeElement = F2(
 							{bottom: 1, left: 0, right: 0, top: 0}),
 							$mdgriffith$elm_ui$Element$Border$color(
 							A2($author$project$Theme$highlight, theme.kind, 0.12)),
-							$mdgriffith$elm_ui$Element$spacing(8)
+							$mdgriffith$elm_ui$Element$spacing(8),
+							$mdgriffith$elm_ui$Element$Events$onClick(
+							$author$project$Page$Quest$List$QuestClicked(quest.title))
 						]),
 					_List_fromArray(
 						[
@@ -20384,7 +20416,7 @@ var $author$project$Page$Quest$List$threeElement = F2(
 								]),
 							_List_fromArray(
 								[
-									A2(
+									(!$elm$core$String$isEmpty(quest.moreInfo)) ? A2(
 									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
 										[
@@ -20392,11 +20424,12 @@ var $author$project$Page$Quest$List$threeElement = F2(
 											$mdgriffith$elm_ui$Element$alignTop,
 											$mdgriffith$elm_ui$Element$Font$color(
 											A2($author$project$Theme$highlight, theme.kind, 0.54)),
-											$mdgriffith$elm_ui$Element$Events$onClick(
-											A2($author$project$Page$Quest$List$OpenDialog, quest.title, quest.moreInfo)),
+											$mdgriffith$elm_ui$Element$htmlAttribute(
+											$author$project$Page$Quest$List$onClickNoBubble(
+												A2($author$project$Page$Quest$List$OpenDialog, quest.title, quest.moreInfo))),
 											$mdgriffith$elm_ui$Element$pointer
 										]),
-									$author$project$Material$Icons$info),
+									$author$project$Material$Icons$info) : $mdgriffith$elm_ui$Element$none,
 									A2(
 									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
@@ -20412,10 +20445,6 @@ var $author$project$Page$Quest$List$threeElement = F2(
 						]))
 				]));
 	});
-var $author$project$Page$Quest$List$threeLineElement = F2(
-	function (theme, quest) {
-		return A2($author$project$Page$Quest$List$threeElement, theme, quest);
-	});
 var $author$project$Page$Quest$List$threeLine = F2(
 	function (theme, quests) {
 		return A2(
@@ -20429,7 +20458,7 @@ var $author$project$Page$Quest$List$threeLine = F2(
 				]),
 			A2(
 				$elm$core$List$map,
-				$author$project$Page$Quest$List$threeLineElement(theme),
+				$author$project$Page$Quest$List$threeElement(theme),
 				quests));
 	});
 var $author$project$Page$Quest$List$list = F2(
@@ -20513,17 +20542,37 @@ var $author$project$Page$Quest$List$data = function (model) {
 				]);
 		case 'Success':
 			var quests = _v0.a;
-			return $elm$core$String$isEmpty(model.searchText) ? A2(
-				$elm$core$List$map,
-				$author$project$Page$Quest$List$list(model.theme),
-				$author$project$Page$Quest$List$sort(quests)) : A2(
-				$elm$core$List$map,
-				$author$project$Page$Quest$List$list(model.theme),
-				$author$project$Page$Quest$List$sort(
+			return $elm$core$String$isEmpty(model.searchText) ? _List_fromArray(
+				[
 					A2(
-						$elm$core$List$filter,
-						$author$project$Page$Quest$List$filter(model.searchText),
-						quests)));
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 80, left: 0, right: 0, top: 0})
+						]),
+					A2(
+						$elm$core$List$map,
+						$author$project$Page$Quest$List$list(model.theme),
+						$author$project$Page$Quest$List$sort(quests)))
+				]) : _List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 80, left: 0, right: 0, top: 0})
+						]),
+					A2(
+						$elm$core$List$map,
+						$author$project$Page$Quest$List$list(model.theme),
+						$author$project$Page$Quest$List$sort(
+							A2(
+								$elm$core$List$filter,
+								$author$project$Page$Quest$List$filter(model.searchText),
+								quests))))
+				]);
 		default:
 			var error = _v0.a;
 			switch (error.$) {
@@ -21378,7 +21427,7 @@ var $author$project$Main$view = function (model) {
 								$author$project$Main$GotQuestListMsg,
 								$author$project$Page$Quest$List$view(data)))
 						]),
-					title: 'My title'
+					title: 'Quest list'
 				};
 		}
 	}
@@ -21387,4 +21436,4 @@ var $author$project$Main$main = A2(
 	$author$project$Api$application,
 	$author$project$Viewer$decoder,
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"HideSnackbar":[],"MenuClosed":[],"MenuToggled":[],"OpenDialog":["String.String","String.String"],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Quest.Quest":{"args":[],"type":"{ title : String.String, description : String.String, category : String.String, timeEstimate : String.String, moreInfo : String.String }"},"RemoteData.WebData":{"args":["a"],"type":"RemoteData.RemoteData Http.Error a"}},"unions":{"Main.Msg":{"args":[],"tags":{"GotAddQuestMsg":["Page.Quest.Add.Msg"],"GotLoginMsg":["Page.Login.Msg"],"GotQuestListMsg":["Page.Quest.List.Msg"],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ViewerChanged":["Maybe.Maybe Viewer.Viewer"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"CompletedLogin":["Result.Result Http.Error Viewer.Viewer"],"EnteredName":["String.String"],"EnteredPassword":["String.String"],"HideSnackbar":[],"ShowPasswordToggled":[],"ShowSnackbar":[],"SubmittedForm":[]}},"Page.Quest.Add.Msg":{"args":[],"tags":{"AddedQuest":["Result.Result Http.Error Quest.Quest"],"EnteredTitle":["String.String"],"EnteredDescription":["String.String"],"EnteredCategory":["String.String"],"EnteredTimeEstimate":["String.String"],"EnteredMoreInfo":["String.String"],"SubmittedForm":[]}},"Page.Quest.List.Msg":{"args":[],"tags":{"CloseDialog":[],"GotQuests":["RemoteData.WebData (List.List Quest.Quest)"],"MenuClosed":[],"MenuToggled":[],"OpenDialog":["String.String","String.String"],"QuestClicked":["String.String"],"SnackbarHid":[],"UpdateSearch":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Viewer.Viewer":{"args":[],"tags":{"Viewer":["Avatar.Avatar","Api.Cred"]}},"Avatar.Avatar":{"args":[],"tags":{"Avatar":["Maybe.Maybe String.String"]}},"Api.Cred":{"args":[],"tags":{"Cred":["Username.Username","String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Username.Username":{"args":[],"tags":{"Username":["String.String"]}}}}})}});}(this));

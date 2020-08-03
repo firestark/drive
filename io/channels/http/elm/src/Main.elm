@@ -44,7 +44,7 @@ init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.light
+            Theme.dark
     in
     case maybeViewer of
         Just viewer ->
@@ -208,7 +208,7 @@ view model =
                     }
 
                 QuestList data ->
-                    { title = "My title"
+                    { title = "Quest list"
                     , body = [ wrapper session.theme.background <| Element.map GotQuestListMsg (Page.Quest.List.view data) ]
                     }
 

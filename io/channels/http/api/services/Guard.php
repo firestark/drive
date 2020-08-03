@@ -30,6 +30,13 @@ class Guard
         $this->artDirectorManager = $artDirectorManager;
     }
 
+    public function current(string $token): ArtDirector
+    {
+        $result = JWT::decode($token, $this->key, array('HS256'));
+        $array = (array) $result;
+        return $this->artDirectorManager->find($array['art director']->name);
+    }
+
     /**
      * Check if the guard allows access to a given request.
      * @param string $request       The application feature request.
@@ -61,7 +68,7 @@ class Guard
      */
     public function stamp(ArtDirector $artDirector): string
     {
-        return JWT::encode(['artDirector' => $artDirector], $this->key);
+        return JWT::encode(['art director' => $artDirector], $this->key);
     }
 
     private function validate(string $token): bool

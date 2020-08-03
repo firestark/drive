@@ -8,7 +8,10 @@ import Element.Border as Border
 import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input exposing (placeholder)
+import Html
+import Html.Events
 import Http
+import Json.Decode as Decode
 import Material.Dialog exposing (dialog)
 import Material.Elevation as Elevation
 import Material.Fab as Fab
@@ -39,10 +42,11 @@ type Dialog
 type Msg
     = CloseDialog
     | GotQuests (WebData (List Quest))
-    | HideSnackbar
     | MenuClosed
     | MenuToggled
     | OpenDialog String String
+    | QuestClicked String
+    | SnackbarHid
     | UpdateSearch String
 
 
@@ -55,7 +59,15 @@ init snackbarTxt cred theme =
       , snackbar = snackbarTxt
       , menuOpen = False
       }
-    , Cmd.batch [ request cred, delay 5000 HideSnackbar ]
+    , Cmd.batch
+        [ request cred
+        , case snackbarTxt of
+            Just _ ->
+                delay 5000 SnackbarHid
+
+            Nothing ->
+                Cmd.none
+        ]
     )
 
 
@@ -79,9 +91,6 @@ update msg model =
         GotQuests response ->
             ( { model | questList = response }, Cmd.none )
 
-        HideSnackbar ->
-            ( { model | snackbar = Nothing }, Cmd.none )
-
         MenuClosed ->
             ( { model | menuOpen = False }, Cmd.none )
 
@@ -90,6 +99,12 @@ update msg model =
 
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
+
+        QuestClicked _ ->
+            ( model, Cmd.none )
+
+        SnackbarHid ->
+            ( { model | snackbar = Nothing }, Cmd.none )
 
         UpdateSearch text ->
             ( { model | searchText = text }, Cmd.none )
@@ -228,10 +243,30 @@ data model =
 
         RemoteData.Success quests ->
             if String.isEmpty model.searchText then
-                List.map (list model.theme) (sort quests)
+                [ column
+                    [ Element.paddingEach
+                        { top = 0
+                        , right = 0
+                        , bottom = 80
+                        , left = 0
+                        }
+                    ]
+                  <|
+                    List.map (list model.theme) (sort quests)
+                ]
 
             else
-                List.map (list model.theme) (sort <| List.filter (filter model.searchText) quests)
+                [ column
+                    [ Element.paddingEach
+                        { top = 0
+                        , right = 0
+                        , bottom = 80
+                        , left = 0
+                        }
+                    ]
+                  <|
+                    List.map (list model.theme) (sort <| List.filter (filter model.searchText) quests)
+                ]
 
         RemoteData.Failure error ->
             case error of
@@ -389,18 +424,21 @@ threeLine theme quests =
             }
         ]
     <|
-        List.map (threeLineElement theme) quests
+        List.map (threeElement theme) quests
 
 
-threeLineElement : Theme -> Quest -> Element Msg
-threeLineElement theme quest =
-    threeElement theme quest
+onClickNoBubble : msg -> Html.Attribute msg
+onClickNoBubble message =
+    Html.Events.custom "click" (Decode.succeed { message = message, stopPropagation = True, preventDefault = True })
 
 
 threeElement : Theme -> Quest -> Element Msg
 threeElement theme quest =
     row
-        [ width fill, spacing 32 ]
+        [ width fill
+        , spacing 32
+        , pointer
+        ]
         [ icon theme [] Icons.check
         , row
             [ width fill
@@ -414,6 +452,7 @@ threeElement theme quest =
                 }
             , Border.color <| Theme.highlight theme.kind 0.12
             , spacing 8
+            , onClick <| QuestClicked quest.title
             ]
             [ column
                 [ width fill, spacing 4 ]
@@ -452,7 +491,11 @@ threeElement theme quest =
                     , top = 16
                     }
                 ]
-                [ Element.el [ Element.alignRight, Element.alignTop, Font.color (Theme.highlight theme.kind 0.54), onClick (OpenDialog quest.title quest.moreInfo), Element.pointer ] Icons.info
+                [ if not <| String.isEmpty quest.moreInfo then
+                    Element.el [ Element.alignRight, Element.alignTop, Font.color (Theme.highlight theme.kind 0.54), Element.htmlAttribute <| onClickNoBubble (OpenDialog quest.title quest.moreInfo), Element.pointer ] Icons.info
+
+                  else
+                    Element.none
                 , Element.el [ Element.alignRight, Element.alignBottom, Font.size 12, Font.color (Theme.highlight theme.kind 0.54) ] <| Element.text quest.timeEstimate
                 ]
             ]

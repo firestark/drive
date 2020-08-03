@@ -47,6 +47,8 @@ abstract class QuestManager
 
     abstract public function all(): array;
 
+    abstract public function find(string $title): Quest;
+
     abstract public function has(string $title): bool;
 
     abstract protected function create(Quest $quest);

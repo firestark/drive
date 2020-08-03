@@ -43,6 +43,24 @@ class FlatFileArtDirectorManager implements ArtDirectorManager
         return $this->artDirectors[$artDirector->name]->matches($artDirector);
     }
 
+    public function complete(ArtDirector $artDirector, Quest $quest)
+    {
+        if (! $this->has($artDirector->name))
+            throw new Exception("An art director with name: $name does not exist.");
+
+        $this->artDirectors[$artDirector->name]->complete($quest->title);
+        $this->write();
+    }
+
+    public function uncomplete(ArtDirector $artDirector, Quest $quest)
+    {
+        if (! $this->has($artDirector->name))
+            throw new Exception("An art director with name: $name does not exist.");
+
+        $this->artDirectors[$artDirector->name]->uncomplete($quest->title);
+        $this->write();
+    }
+
     private function write()
     {
         file_put_contents($this->file, serialize($this->artDirectors));

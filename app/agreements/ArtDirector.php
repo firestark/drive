@@ -1,6 +1,6 @@
 <?php
 
-class ArtDirector
+class ArtDirector implements JsonSerializable
 {
     private $name = '';
     private $completed = [];
@@ -24,7 +24,7 @@ class ArtDirector
 
     public function hasCompleted(string $title): bool
     {
-        return in_array($title, $this->completed);
+        return isset($this->completed[$title]);
     }
 
     public function matches(ArtDirector $artDirector): bool
@@ -36,5 +36,13 @@ class ArtDirector
     {
         if (isset($this->{$property}))
             return $this->{$property};
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'name'      => $this->name,
+            'completed' => $this->completed,
+        ];
     }
 }
