@@ -25,7 +25,8 @@ import Theme exposing (Theme)
 
 
 type alias Model =
-    { theme : Theme
+    { cred : Cred
+    , theme : Theme
     , searchText : String
     , questList : WebData (List Quest)
     , dialog : Dialog
@@ -41,6 +42,7 @@ type Dialog
 
 type Msg
     = CloseDialog
+    | GotQuestCompletionResponse (WebData String)
     | GotQuests (WebData (List Quest))
     | MenuClosed
     | MenuToggled
@@ -52,7 +54,8 @@ type Msg
 
 init : Maybe String -> Cred -> Theme -> ( Model, Cmd Msg )
 init snackbarTxt cred theme =
-    ( { theme = theme
+    ( { cred = cred
+      , theme = theme
       , searchText = ""
       , questList = RemoteData.NotAsked
       , dialog = Closed
@@ -88,6 +91,9 @@ update msg model =
         CloseDialog ->
             ( { model | dialog = Closed }, Cmd.none )
 
+        GotQuestCompletionResponse _ ->
+            ( model, Cmd.none )
+
         GotQuests response ->
             ( { model | questList = response }, Cmd.none )
 
@@ -100,8 +106,8 @@ update msg model =
         OpenDialog title moreInfo ->
             ( { model | dialog = Open { title = title, moreInfo = moreInfo } }, Cmd.none )
 
-        QuestClicked _ ->
-            ( model, Cmd.none )
+        QuestClicked title ->
+            ( model, Api.get (Endpoint.complete title) (Just model.cred) GotQuestCompletionResponse Decode.string )
 
         SnackbarHid ->
             ( { model | snackbar = Nothing }, Cmd.none )

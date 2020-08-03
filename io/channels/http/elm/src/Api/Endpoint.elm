@@ -1,4 +1,4 @@
-module Api.Endpoint exposing (Endpoint, addQuest, login, quests, request, titleAvailability, user, users)
+module Api.Endpoint exposing (Endpoint, addQuest, complete, login, quests, request, titleAvailability, user, users)
 
 import Http
 import Url.Builder exposing (QueryParameter)
@@ -88,3 +88,8 @@ addQuest =
 titleAvailability : String -> Endpoint
 titleAvailability title =
     url [ title ] []
+
+
+complete : String -> Endpoint
+complete title =
+    url [ "complete", title ] []
