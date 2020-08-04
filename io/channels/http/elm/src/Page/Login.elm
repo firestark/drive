@@ -177,7 +177,7 @@ inputName model =
 
 inputPassword : Model -> Element Msg
 inputPassword model =
-    column []
+    column [ width fill ]
         [ row
             [ height (px 56)
             , width fill
@@ -194,6 +194,7 @@ inputPassword model =
                 , Font.color <| Theme.highlight model.theme.kind 0.87
                 , Border.width 0
                 , Background.color (rgba255 0 0 0 0)
+                , width fill
                 ]
                 { onChange = EnteredPassword
                 , text = model.form.password
