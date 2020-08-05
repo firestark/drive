@@ -30,7 +30,7 @@ type alias Model =
     , searchText : String
     , questList : WebData (List Quest)
     , dialog : Dialog
-    , snackbar : Maybe String
+    , snackbar : Snackbar
     , menuOpen : Bool
     }
 
@@ -38,6 +38,12 @@ type alias Model =
 type Dialog
     = Closed
     | Open { title : String, moreInfo : String }
+
+
+type alias Snackbar =
+    { removing : Bool
+    , messages : List String
+    }
 
 
 type Msg
@@ -49,6 +55,7 @@ type Msg
     | OpenDialog String String
     | QuestClicked String
     | SnackbarHid
+    | SnackbarHidRequested
     | UpdateSearch String
 
 
@@ -59,7 +66,7 @@ init snackbarTxt cred theme =
       , searchText = ""
       , questList = RemoteData.NotAsked
       , dialog = Closed
-      , snackbar = snackbarTxt
+      , snackbar = initSnackbar snackbarTxt
       , menuOpen = False
       }
     , Cmd.batch
@@ -72,6 +79,20 @@ init snackbarTxt cred theme =
                 Cmd.none
         ]
     )
+
+
+initSnackbar : Maybe String -> Snackbar
+initSnackbar snackbarTxt =
+    case snackbarTxt of
+        Just text ->
+            { removing = False
+            , messages = [ text ]
+            }
+
+        Nothing ->
+            { removing = False
+            , messages = []
+            }
 
 
 delay : Float -> msg -> Cmd msg
@@ -94,10 +115,24 @@ update msg model =
         GotQuestCompletionResponse response ->
             case response of
                 RemoteData.Success _ ->
-                    ( { model | snackbar = Just "Completed quest." }, delay 5000 SnackbarHid )
+                    let
+                        snackbarModel =
+                            model.snackbar
+
+                        newSnackbar =
+                            { snackbarModel | messages = List.append snackbarModel.messages [ "Completed quest." ] }
+                    in
+                    update SnackbarHidRequested { model | snackbar = newSnackbar }
 
                 _ ->
-                    ( { model | snackbar = Just "Something went wrong." }, delay 5000 SnackbarHid )
+                    let
+                        snackbarModel =
+                            model.snackbar
+
+                        newSnackbar =
+                            { snackbarModel | messages = List.append snackbarModel.messages [ "Something went wrong." ] }
+                    in
+                    update SnackbarHidRequested { model | snackbar = newSnackbar }
 
         GotQuests response ->
             ( { model | questList = response }, Cmd.none )
@@ -115,7 +150,36 @@ update msg model =
             ( model, Api.get (Endpoint.complete title) (Just model.cred) GotQuestCompletionResponse Decode.string )
 
         SnackbarHid ->
-            ( { model | snackbar = Nothing }, Cmd.none )
+            let
+                ( removing, cmd ) =
+                    case List.drop 1 model.snackbar.messages of
+                        [] ->
+                            ( False, Cmd.none )
+
+                        _ ->
+                            ( True, delay 5000 SnackbarHid )
+
+                snackbarModel =
+                    model.snackbar
+
+                newSnackbar =
+                    { snackbarModel | removing = removing, messages = List.drop 1 snackbarModel.messages }
+            in
+            ( { model | snackbar = newSnackbar }, cmd )
+
+        SnackbarHidRequested ->
+            if model.snackbar.removing then
+                ( model, Cmd.none )
+
+            else
+                let
+                    snackbarModel =
+                        model.snackbar
+
+                    newSnackbar =
+                        { snackbarModel | removing = True }
+                in
+                ( { model | snackbar = newSnackbar }, delay 5000 SnackbarHid )
 
         UpdateSearch text ->
             ( { model | searchText = text }, Cmd.none )
@@ -191,11 +255,11 @@ view model =
                 Closed ->
                     Element.none
         , Element.inFront <|
-            case model.snackbar of
-                Just txt ->
+            case model.snackbar.messages of
+                txt :: _ ->
                     snackbar txt
 
-                Nothing ->
+                _ ->
                     Element.none
         , if model.menuOpen then
             onClick MenuClosed
