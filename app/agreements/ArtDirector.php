@@ -14,7 +14,7 @@ class ArtDirector implements JsonSerializable
 
     public function complete(string $title)
     {
-        $this->completed[$title] = $title;
+        $this->completed[$title] = new Completion($title);
     }
 
     public function uncomplete(string $title)

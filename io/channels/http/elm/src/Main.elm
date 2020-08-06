@@ -44,7 +44,7 @@ init : Maybe Viewer -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init maybeViewer url navKey =
     let
         theme =
-            Theme.light
+            Theme.dark
     in
     case maybeViewer of
         Just viewer ->

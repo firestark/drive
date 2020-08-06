@@ -2,6 +2,7 @@ module Page.Quest.List exposing (Model, Msg, init, update, view)
 
 import Api exposing (Cred)
 import Api.Endpoint as Endpoint
+import Completion exposing (Completion)
 import Element exposing (Element, centerX, centerY, column, el, fill, height, maximum, paddingXY, pointer, px, rgb255, rgba255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
@@ -29,6 +30,7 @@ type alias Model =
     , theme : Theme
     , searchText : String
     , questList : WebData (List Quest)
+    , completions : WebData (List Completion)
     , dialog : Dialog
     , snackbar : Snackbar
     , menuOpen : Bool
@@ -48,6 +50,7 @@ type alias Snackbar =
 
 type Msg
     = CloseDialog
+    | GotQuestCompletions (WebData (List Completion))
     | GotQuestCompletionResponse (WebData String)
     | GotQuests (WebData (List Quest))
     | MenuClosed
@@ -65,12 +68,14 @@ init snackbarTxt cred theme =
       , theme = theme
       , searchText = ""
       , questList = RemoteData.NotAsked
+      , completions = RemoteData.NotAsked
       , dialog = Closed
       , snackbar = initSnackbar snackbarTxt
       , menuOpen = False
       }
     , Cmd.batch
         [ request cred
+        , request2 cred
         , case snackbarTxt of
             Just _ ->
                 delay 5000 SnackbarHid
@@ -79,6 +84,16 @@ init snackbarTxt cred theme =
                 Cmd.none
         ]
     )
+
+
+questCompletionCount : Model -> Int
+questCompletionCount model =
+    case model.completions of
+        RemoteData.Success completionList ->
+            List.length completionList
+
+        _ ->
+            0
 
 
 initSnackbar : Maybe String -> Snackbar
@@ -106,11 +121,19 @@ request cred =
     Api.get Endpoint.quests (Just cred) GotQuests Quest.decoder
 
 
+request2 : Cred -> Cmd Msg
+request2 cred =
+    Api.get Endpoint.completedToday (Just cred) GotQuestCompletions Completion.decoder
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         CloseDialog ->
             ( { model | dialog = Closed }, Cmd.none )
+
+        GotQuestCompletions response ->
+            ( { model | completions = response }, Cmd.none )
 
         GotQuestCompletionResponse response ->
             case response of
@@ -373,7 +396,7 @@ topAppBar model =
                     [ Font.size 13
                     , Font.color (Element.rgba255 255 255 255 0.76)
                     ]
-                    (text "0/1 done today")
+                    (text <| (String.fromInt <| questCompletionCount model) ++ "/1 completed today")
                 ]
             ]
         ]
