@@ -290,7 +290,7 @@ snackbar txt =
     column
         [ Element.alignBottom
         , width fill
-        , paddingXY 8 8
+        , paddingXY 8 80
         ]
         [ row
             [ width fill
